@@ -20,7 +20,7 @@ jobs:
     - name: Build with Gradle
       run: |
         chmod +x gradlew
-        ./gradlew build
+        ./gradlew build -PAPI_BASE_URL=${{ secrets.API_BASE_URL }}
     
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v3
@@ -55,7 +55,7 @@ jobs:
       run: |
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f server/Dockerfile .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-    
+
     - name: Upload CLI to S3
       run: |
         aws s3 cp cli/build/libs/taskmanagement-cli.jar s3://task-management-user-cli/taskmanagement-cli-latest.jar
