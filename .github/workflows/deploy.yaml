@@ -58,7 +58,7 @@ jobs:
     
     - name: Upload CLI to S3
       run: |
-        aws s3 cp cli/build/libs/taskmanagement-cli.jar s3://task-management-cli/taskmanagement-cli-latest.jar --acl public-read
+        aws s3 cp cli/build/libs/taskmanagement-cli.jar s3://task-management-cli/taskmanagement-cli-latest.jar
 
     - name: Get DB Endpoint
       id: get_endpoint
