@@ -20,7 +20,8 @@ jobs:
     - name: Build with Gradle
       run: |
         chmod +x gradlew
-        ./gradlew build -PAPI_BASE_URL=${{ secrets.API_BASE_URL }}
+        ./gradlew :server:build
+        ./gradlew :cli:build -PAPI_BASE_URL=${{ secrets.API_BASE_URL }}
     
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v3
