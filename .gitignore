@@ -72,4 +72,3 @@ terraform.rc
 logs/
 application-local.yml
 .env
-config/
