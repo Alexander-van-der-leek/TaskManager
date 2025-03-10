@@ -125,5 +125,5 @@ resource "aws_ecr_repository" "app_repo" {
 }
 
 resource "aws_s3_bucket" "cli_bucket" {
-  bucket = "${var.project_name}-cli"
+  bucket = "${var.project_name}-user-cli"
 }
