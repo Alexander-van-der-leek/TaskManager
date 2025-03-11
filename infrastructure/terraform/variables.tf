@@ -132,4 +132,10 @@ resource "aws_ecs_service" "app_service" {
     security_groups  = [aws_security_group.ecs_sg.id]
     assign_public_ip = true
   }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.app_tg.arn
+    container_name   = "${var.project_name}-container"
+    container_port   = 8080
+  }
 }
