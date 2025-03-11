@@ -146,6 +146,18 @@ resource "aws_lb_target_group" "app_tg" {
   protocol    = "HTTP"
   vpc_id      = aws_vpc.main.id
   target_type = "ip"
+
+  health_check {
+    enabled             = true
+    path                = "/api/tasks"  # Use a path your application responds to
+    port                = "traffic-port"
+    healthy_threshold   = 2
+    unhealthy_threshold = 5
+    timeout             = 10
+    interval            = 30
+    matcher             = "200-499"  # Accept a wider range of response codes
+  }
+
 }
 
 resource "aws_lb_listener" "app_listener" {
