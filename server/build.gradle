@@ -30,6 +30,16 @@ flyway {
     baselineOnMigrate = true
 }
 
+processResources {
+    filesMatching("application.yml") {
+        expand([
+                JWT_SECRET:project.findProperty("JWT_SECRET") ?: "yoursercretkeyyoursercretkeyyoursercretkeyyoursercretkey",
+                GOOGLE_CLIENT_ID:project.findProperty("GOOGLE_CLIENT_ID" ?: "placeholder")
+        ])
+    }
+}
+
+
 bootJar {
     archiveFileName = 'taskmanagement-server.jar'
 }

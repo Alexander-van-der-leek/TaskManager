@@ -22,11 +22,11 @@ server:
 
 security:
   jwt:
-    secret: ${JWT_SECRET:supersecretkeysupersecretkeysupersecretkeysupersecretkey}
+    secret: ${JWT_SECRET}
     token-validity-in-seconds: 86400
   oauth2:
     google:
-      client-id: ${GOOGLE_CLIENT_ID:731870641465-2m1plh852jj6rubpq403i8cjs7521k2u.apps.googleusercontent.com}
+      client-id: ${GOOGLE_CLIENT_ID}
 
 logging:
   level:
