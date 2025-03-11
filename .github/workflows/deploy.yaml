@@ -20,7 +20,7 @@ jobs:
     - name: Build with Gradle
       run: |
         chmod +x gradlew
-        ./gradlew build
+        ./gradlew clean build -PAPI_BASE_URL=${{ secrets.API_BASE_URL }} -PGOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
     
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v3
