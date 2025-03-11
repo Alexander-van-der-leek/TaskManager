@@ -24,4 +24,17 @@ dependencies {
 
 bootJar {
     archiveFileName = 'taskmanagement-cli.jar'
+
+    if (project.hasProperty('API_BASE_URL')) {
+        manifest {
+            attributes(
+                    "API-Base-URl": project('API_BASE_URL')
+            )
+        }
+        doFirst {
+            systemProperty 'API_BASE_URL', project.property('API_BASE_URL')
+        }
+    }
+
+
 }
