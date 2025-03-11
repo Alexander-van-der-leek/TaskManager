@@ -20,7 +20,7 @@ jobs:
     - name: Build with Gradle
       run: |
         chmod +x gradlew
-        ./gradlew build -Dcli.api.base-url=https://your-new-url.com/api
+        ./gradlew build
     
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v3
