@@ -138,4 +138,8 @@ resource "aws_ecs_service" "app_service" {
     container_name   = "${var.project_name}-container"
     container_port   = 8080
   }
+
+  depends_on = [
+    aws_lb_listener.app_listener
+  ]
 }
