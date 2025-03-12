@@ -64,7 +64,7 @@ jobs:
       run: |
         echo "Using DB endpoint: $db_endpoint"
         ./gradlew flywayMigrate \
-          -Dflyway.url=jdbc:postgresql://$db_endpoint \
+          -Dflyway.url=jdbc:postgresql://$db_endpoint/taskmanagement \
           -Dflyway.user=${{ secrets.DB_USERNAME }} \
           -Dflyway.password=${{ secrets.DB_PASSWORD }}
 
