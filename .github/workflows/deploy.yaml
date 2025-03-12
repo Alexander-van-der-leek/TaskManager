@@ -58,7 +58,7 @@ jobs:
     - name: Build with Gradle
       run: |
         chmod +x gradlew
-        ./gradlew build -PAPI_BASE_URL=$API_BASE_URL -PGOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} -PJWT_SECRET=${{ secrets.JWT_SECRET }} -PDB_USERNAME=${{ secrets.DB_USERNAME }} -PDB_PASSWORD=${{ secrets.DB_PASSWORD }} -PDB_CONNECTION_STRING=$db_endpoint/taskmanagement
+        ./gradlew build -PAPI_BASE_URL=$API_BASE_URL -PGOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} -PJWT_SECRET=${{ secrets.JWT_SECRET }} -PDB_USERNAME=${{ secrets.DB_USERNAME }} -PDB_PASSWORD=${{ secrets.DB_PASSWORD }} -PDB_CONNECTION_STRING=jdbc:postgresql://$db_endpoint/taskmanagement
 
     - name: Run Flyway Migration
       run: |
