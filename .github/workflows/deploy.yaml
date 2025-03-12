@@ -55,19 +55,18 @@ jobs:
         echo "DB endpoint is: $DB_ENDPOINT"
         echo "db_endpoint=$DB_ENDPOINT" >> $GITHUB_ENV
 
-    - name: Run Flyway Migration
-      run: |
-        echo "Using DB endpoint: $db_endpoint"
-        chmod +x gradlew
-        ./gradlew flywayMigrate \
-          -Dflyway.url=jdbc:postgresql://$db_endpoint \
-          -Dflyway.user=${{ secrets.DB_USERNAME }} \
-          -Dflyway.password=${{ secrets.DB_PASSWORD }}
-
     - name: Build with Gradle
       run: |
         chmod +x gradlew
         ./gradlew build -PAPI_BASE_URL=$API_BASE_URL -PGOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} -PJWT_SECRET=${{ secrets.JWT_SECRET }} -PDB_USERNAME=${{ secrets.DB_USERNAME }} -PDB_PASSWORD=${{ secrets.DB_PASSWORD }} -PDB_CONNECTION_STRING=$db_endpoint/taskmanagement
+
+    - name: Run Flyway Migration
+      run: |
+        echo "Using DB endpoint: $db_endpoint"
+        ./gradlew flywayMigrate \
+          -Dflyway.url=jdbc:postgresql://$db_endpoint \
+          -Dflyway.user=${{ secrets.DB_USERNAME }} \
+          -Dflyway.password=${{ secrets.DB_PASSWORD }}
 
     - name: Login to Amazon ECR
       id: login-ecr
