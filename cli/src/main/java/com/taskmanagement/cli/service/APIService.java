@@ -93,6 +93,17 @@ public class APIService {
                 .block();
     }
 
+    // Generic method for authenticated PATCH requests
+    public <T> T patch(String uri, Object body, Class<T> responseType) {
+        return webClient.patch()
+                .uri(uri)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + userSession.getToken())
+                .bodyValue(body != null ? body : new HashMap<>())
+                .retrieve()
+                .bodyToMono(responseType)
+                .block();
+    }
+
     // Generic method for authenticated DELETE requests
     public <T> T delete(String uri, Class<T> responseType) {
         return webClient.delete()
