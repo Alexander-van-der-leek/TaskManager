@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Scanner;
 
 @ShellComponent
-public class LoginShellCommand {
+public class SignInShellCommand {
 
     @Autowired
     private OAuthService oAuthService;
@@ -29,8 +29,8 @@ public class LoginShellCommand {
     @Autowired
     private ShellService shellService;
 
-    @ShellMethod(key = "signin", value = "Authenticate with Google")
-    public void login(@ShellOption(value = {"--headless"}, help = "Run in headless mode (provide token manually)", defaultValue = "false") boolean headless) {
+    @ShellMethod(key = "Signin", value = "Authenticate with Google")
+    public void signin(@ShellOption(value = {"--headless"}, help = "Run in headless mode (provide token manually)", defaultValue = "false") boolean headless) {
         try {
             shellService.printInfo("Starting authentication with Google...");
 
@@ -83,18 +83,18 @@ public class LoginShellCommand {
                 shellService.printError("Authentication failed: " + e.getMessage());
             }
         } catch (Exception e) {
-            shellService.printError("Error during login: " + e.getMessage());
+            shellService.printError("Error during sign in: " + e.getMessage());
         }
     }
 
-    @ShellMethod(key = "logout", value = "Log out and clear session")
-    public void logout() {
+    @ShellMethod(key = "signout", value = "Sign out and clear session")
+    public void signout() {
         if (userSession.isAuthenticated()) {
             String name = userSession.getUserName();
             userSession.clearSession();
-            shellService.printSuccess("Logged out successfully. Goodbye, " + name + "!");
+            shellService.printSuccess("Signed out successfully. Goodbye, " + name + "!");
         } else {
-            shellService.printWarning("You are not currently logged in.");
+            shellService.printWarning("You are not currently signed in.");
         }
     }
 
@@ -105,7 +105,7 @@ public class LoginShellCommand {
             shellService.printInfo("Name: " + userSession.getUserName());
             shellService.printInfo("Email: " + userSession.getUserEmail());
         } else {
-            shellService.printWarning("You are not currently logged in.");
+            shellService.printWarning("You are not currently signed in.");
         }
     }
 }
