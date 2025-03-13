@@ -1,9 +1,11 @@
 package com.taskmanagement.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
+
 import java.time.ZonedDateTime;
 import java.util.UUID;
-
+@Data
 @Entity
 @Table(name = "sprints")
 public class Sprint {
@@ -48,86 +50,5 @@ public class Sprint {
     protected void onUpdate() {
         updatedAt = ZonedDateTime.now();
     }
-
-    // Getters and Setters
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getGoal() {
-        return goal;
-    }
-
-    public void setGoal(String goal) {
-        this.goal = goal;
-    }
-
-    public User getScrumMaster() {
-        return scrumMaster;
-    }
-
-    public void setScrumMaster(User scrumMaster) {
-        this.scrumMaster = scrumMaster;
-    }
-
-    public int getCapacityPoints() {
-        return capacityPoints;
-    }
-
-    public void setCapacityPoints(int capacityPoints) {
-        this.capacityPoints = capacityPoints;
-    }
-
-    public ZonedDateTime getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(ZonedDateTime startDate) {
-        this.startDate = startDate;
-    }
-
-    public ZonedDateTime getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(ZonedDateTime endDate) {
-        this.endDate = endDate;
-    }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
-
-    public ZonedDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(ZonedDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public ZonedDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(ZonedDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
 }
+
