@@ -29,7 +29,7 @@ public class LoginShellCommand {
     @Autowired
     private ShellService shellService;
 
-    @ShellMethod(key = "signin", value = "Authenticate with Google")
+    @ShellMethod(key = "login", value = "Authenticate with Google")
     public void login(@ShellOption(value = {"--headless"}, help = "Run in headless mode (provide token manually)", defaultValue = "false") boolean headless) {
         try {
             shellService.printInfo("Starting authentication with Google...");
@@ -96,6 +96,12 @@ public class LoginShellCommand {
         } else {
             shellService.printWarning("You are not currently logged in.");
         }
+    }
+
+    @ShellMethod(key = "close", value = "Close application")
+    public void close(){
+        shellService.printSuccess("Have a good day 👋");
+        System.exit(0);
     }
 
     @ShellMethod(key = "whoami", value = "Show current user information")
