@@ -9,13 +9,12 @@ import com.taskmanagement.security.GoogleTokenVerifier;
 import com.taskmanagement.security.JWTTokenProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class AuthService {
@@ -47,10 +46,17 @@ public class AuthService {
 
                     User user = existingUser.orElseGet(() -> createNewUser(googleUserInfo));
 
+                    List<GrantedAuthority> authorities = Collections.singletonList(
+                            new SimpleGrantedAuthority("ROLE_" +user.getRole().getName())
+                    );
+
+                    logger.info("User auth: {}", authorities.get(0));
+
+
                     String jwt = tokenProvider.createToken(
                             user.getId(),
                             user.getEmail(),
-                            Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().getName()))
+                            authorities
                     );
 
                     return new AuthResponseDTO(jwt, user.getId(), user.getName(), user.getEmail());
