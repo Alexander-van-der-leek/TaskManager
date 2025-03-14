@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class EpicService {
@@ -31,7 +30,6 @@ public class EpicService {
                 .orElseThrow(() -> new EpicNotFoundException("User not found with id: " + epicDTO.getOwnerId()));
 
         Epic epic = new Epic();
-        epic.setId(UUID.randomUUID());
         epic.setName(epicDTO.getName());
         epic.setDescription(epicDTO.getDescription());
         epic.setOwner(owner);
@@ -50,11 +48,11 @@ public class EpicService {
         return epicRepository.findAll();
     }
 
-    public Optional<Epic> getEpicById(UUID id) {
+    public Optional<Epic> getEpicById(Integer id) {
         return epicRepository.findById(id);
     }
 
-    public Epic updateEpic(UUID id, EpicDTO epicDTO) {
+    public Epic updateEpic(Integer id, EpicDTO epicDTO) {
         return epicRepository.findById(id).map(epic -> {
             epic.setName(epicDTO.getName());
             epic.setDescription(epicDTO.getDescription());
@@ -69,7 +67,7 @@ public class EpicService {
         }).orElseThrow(() -> new EpicNotFoundException("Epic not found with id: " + id));
     }
 
-    public void deleteEpic(UUID id) {
+    public void deleteEpic(Integer id) {
         epicRepository.findById(id).orElseThrow(() -> new EpicNotFoundException("Epic not found with id: " + id));
         epicRepository.deleteById(id);
 

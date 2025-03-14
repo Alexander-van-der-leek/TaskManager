@@ -1,6 +1,7 @@
 package com.taskmanagement.cli.command;
 
 import com.taskmanagement.cli.config.UserSession;
+import com.taskmanagement.cli.service.APIService;
 import com.taskmanagement.cli.service.ShellService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.Availability;
@@ -10,6 +11,9 @@ import org.springframework.shell.standard.ShellMethodAvailability;
 
 @ShellComponent
 public class EpicSprintShellCommands {
+
+    @Autowired
+    private APIService apiService;
 
     @Autowired
     private UserSession userSession;
@@ -22,8 +26,6 @@ public class EpicSprintShellCommands {
     @ShellMethod(key = "epic-list", value = "List all epics")
     @ShellMethodAvailability("isUserLoggedIn")
     public void listEpics() {
-        shellService.printInfo("Feature coming soon: List of epics will be displayed here.");
-        shellService.printInfo("This feature is not yet implemented.");
     }
 
     @ShellMethod(key = "epic-create", value = "Create a new epic")

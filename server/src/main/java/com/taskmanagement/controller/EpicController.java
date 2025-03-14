@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/epics")
@@ -32,20 +31,20 @@ public class EpicController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Epic> getEpicById(@PathVariable UUID id) {
+    public ResponseEntity<Epic> getEpicById(@PathVariable Integer id) {
         return epicService.getEpicById(id)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Epic> updateEpic(@PathVariable UUID id, @RequestBody EpicDTO epicDTO) {
+    public ResponseEntity<Epic> updateEpic(@PathVariable Integer id, @RequestBody EpicDTO epicDTO) {
         Epic updatedEpic = epicService.updateEpic(id, epicDTO);
         return ResponseEntity.ok(updatedEpic);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteEpic(@PathVariable UUID id) {
+    public ResponseEntity<Void> deleteEpic(@PathVariable Integer id) {
         epicService.deleteEpic(id);
         return ResponseEntity.noContent().build();
     }
