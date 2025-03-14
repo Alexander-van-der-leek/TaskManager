@@ -3,11 +3,11 @@ package com.taskmanagement.controller;
 import com.taskmanagement.dto.EpicDTO;
 import com.taskmanagement.model.Epic;
 import com.taskmanagement.service.EpicService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -22,7 +22,7 @@ public class EpicController {
     @PostMapping
     public ResponseEntity<Epic> createEpic(@RequestBody EpicDTO epicDTO) {
         Epic createdEpic = epicService.createEpic(epicDTO);
-        return ResponseEntity.ok(createdEpic);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdEpic);
     }
 
     @GetMapping
@@ -33,8 +33,9 @@ public class EpicController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Epic> getEpicById(@PathVariable UUID id) {
-        Optional<Epic> epic = epicService.getEpicById(id);
-        return epic.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return epicService.getEpicById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     @PutMapping("/{id}")

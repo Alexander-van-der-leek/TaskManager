@@ -11,5 +11,5 @@ import java.util.UUID;
 @Repository
 public interface EpicRepository extends JpaRepository<Epic, UUID> {
     List<Epic> findByOwner(User owner);
-    List<Epic> findByName(String name);
+    List<Epic> findByNameIgnoreCase(String name);
 }

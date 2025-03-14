@@ -1,10 +1,13 @@
 package com.taskmanagement.service;
 
 import com.taskmanagement.dto.EpicDTO;
+import com.taskmanagement.exception.EpicNotFoundException;
 import com.taskmanagement.model.Epic;
 import com.taskmanagement.model.User;
 import com.taskmanagement.repository.EpicRepository;
 import com.taskmanagement.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
@@ -16,6 +19,7 @@ import java.util.UUID;
 public class EpicService {
     private final EpicRepository epicRepository;
     private final UserRepository userRepository;
+    private static final Logger logger = LoggerFactory.getLogger(EpicService.class);
 
     public EpicService(EpicRepository epicRepository, UserRepository userRepository) {
         this.epicRepository = epicRepository;
@@ -23,20 +27,21 @@ public class EpicService {
     }
 
     public Epic createEpic(EpicDTO epicDTO) {
-        User owner = userRepository.findById(epicDTO.getOwnerId()).orElseThrow(
-                () -> new RuntimeException("User not found")
-        );
+        User owner = userRepository.findById(epicDTO.getOwnerId())
+                .orElseThrow(() -> new EpicNotFoundException("User not found with id: " + epicDTO.getOwnerId()));
 
         Epic epic = new Epic();
         epic.setId(UUID.randomUUID());
         epic.setName(epicDTO.getName());
         epic.setDescription(epicDTO.getDescription());
         epic.setOwner(owner);
-        epic.setStoryPoints(epicDTO.getStoryPoints());
-        epic.setStartDate(epicDTO.getStartDate() != null ? epicDTO.getStartDate() : ZonedDateTime.now());
+        epic.setStoryPoints(Optional.ofNullable(epicDTO.getStoryPoints()).orElse(0));
+        epic.setStartDate(Optional.ofNullable(epicDTO.getStartDate()).orElse(ZonedDateTime.now()));
         epic.setTargetEndDate(epicDTO.getTargetEndDate());
         epic.setCreatedAt(ZonedDateTime.now());
         epic.setUpdatedAt(ZonedDateTime.now());
+
+        logger.info("Creating epic with name: {}", epicDTO.getName());
 
         return epicRepository.save(epic);
     }
@@ -53,18 +58,21 @@ public class EpicService {
         return epicRepository.findById(id).map(epic -> {
             epic.setName(epicDTO.getName());
             epic.setDescription(epicDTO.getDescription());
-            epic.setStoryPoints(epicDTO.getStoryPoints());
-            epic.setStartDate(epicDTO.getStartDate());
+            epic.setStoryPoints(epicDTO.getStoryPoints() != null ? epicDTO.getStoryPoints() : 0); // Default to 0 if null
+            epic.setStartDate(epicDTO.getStartDate() != null ? epicDTO.getStartDate() : ZonedDateTime.now());
             epic.setTargetEndDate(epicDTO.getTargetEndDate());
             epic.setUpdatedAt(ZonedDateTime.now());
+
+            logger.info("Updating epic with id: {}", id);
+
             return epicRepository.save(epic);
-        }).orElseThrow(() -> new RuntimeException("Epic not found"));
+        }).orElseThrow(() -> new EpicNotFoundException("Epic not found with id: " + id));
     }
 
     public void deleteEpic(UUID id) {
-        if (!epicRepository.existsById(id)) {
-            throw new RuntimeException("Epic not found");
-        }
+        epicRepository.findById(id).orElseThrow(() -> new EpicNotFoundException("Epic not found with id: " + id));
         epicRepository.deleteById(id);
+
+        logger.info("Deleted epic with id: {}", id);
     }
 }

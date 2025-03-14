@@ -19,12 +19,12 @@ public class Epic {
    @Column(nullable = false)
    private String description;
 
-   @ManyToOne(fetch = FetchType.EAGER)
+   @ManyToOne(fetch = FetchType.LAZY)
    @JoinColumn(name = "owner_id", nullable = false)
    private User owner;
 
    @Column(name = "story_points", nullable = false)
-   private int storyPoints;
+   private Integer storyPoints;
 
    @Column(name = "start_date", nullable = false)
    private ZonedDateTime startDate;
