@@ -10,6 +10,10 @@ import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +21,25 @@ import java.util.Map;
 
 @ShellComponent
 public class TaskShellCommand {
+
+    private ZonedDateTime parseDate(String dateStr) {
+        if (dateStr == null || dateStr.trim().isEmpty()) {
+            return null;
+        }
+
+        try {
+            // Try parsing as simple date (yyyy-MM-dd)
+            LocalDate localDate = LocalDate.parse(dateStr);
+            return localDate.atStartOfDay(ZoneId.systemDefault());
+        } catch (DateTimeParseException e) {
+            try {
+                // If that fails, try the full ZonedDateTime format
+                return ZonedDateTime.parse(dateStr);
+            } catch (DateTimeParseException ex) {
+                throw new IllegalArgumentException("Invalid date format. Please use yyyy-MM-dd format.", ex);
+            }
+        }
+    }
 
     @Autowired
     private APIService apiService;
@@ -69,7 +92,11 @@ public class TaskShellCommand {
             @ShellOption(value = {"-a", "--assignee"}, help = "Assignee ID") String assigneeId,
             @ShellOption(value = {"-s", "--status"}, help = "Status ID") String statusId,
             @ShellOption(value = {"-p", "--priority"}, help = "Priority ID") String priorityId,
-            @ShellOption(value = {"-due", "--due-date"}, help = "Due date (YYYY-MM-DD)") String dueDate
+            @ShellOption(value = {"-due", "--due-date"}, help = "Due date (YYYY-MM-DD)") String dueDate,
+            @ShellOption(value = {"-e", "--epic"}, help = "Epic ID", defaultValue = ShellOption.NULL) String epicId,
+            @ShellOption(value = {"-sp", "--sprint"}, help = "Sprint ID", defaultValue = ShellOption.NULL) String sprintId,
+            @ShellOption(value = {"-pts", "--story-points"}, help = "Story points", defaultValue = "0") Integer storyPoints,
+            @ShellOption(value = {"-hrs", "--estimated-hours"}, help = "Estimated hours", defaultValue = "0") Integer estimatedHours
     ) {
         try {
             shellService.printHeading("Creating new task...");
@@ -79,11 +106,19 @@ public class TaskShellCommand {
             task.put("title", title);
             task.put("description", description);
             task.put("assignedToId", assigneeId);
-            task.put("statusId", statusId);
-            task.put("priorityId", priorityId);
-            task.put("dueDate", dueDate);
-            task.put("storyPoints", 0);
-            task.put("estimatedHours", 0);
+            task.put("statusId", Integer.parseInt(statusId));
+            task.put("priorityId", Integer.parseInt(priorityId));
+            task.put("dueDate", parseDate(dueDate));
+            task.put("storyPoints", storyPoints);
+            task.put("estimatedHours", estimatedHours);
+
+            if (epicId != null) {
+                task.put("epicId", epicId);
+            }
+
+            if (sprintId != null) {
+                task.put("sprintId", sprintId);
+            }
 
             Object createdTask = apiService.post("/tasks", task, Object.class);
             shellService.printSuccess("Task created successfully!");
@@ -119,6 +154,14 @@ public class TaskShellCommand {
             shellService.printInfo("Story Points: " + task.get("storyPoints"));
             shellService.printInfo("Estimated Hours: " + task.get("estimatedHours"));
             shellService.printInfo("Due Date: " + task.get("dueDate"));
+
+            if (task.get("epicName") != null) {
+                shellService.printInfo("Epic: " + task.get("epicName") + " (" + task.get("epicId") + ")");
+            }
+
+            if (task.get("sprintName") != null) {
+                shellService.printInfo("Sprint: " + task.get("sprintName") + " (" + task.get("sprintId") + ")");
+            }
         } catch (Exception e) {
             shellService.printError("Error fetching task: " + e.getMessage());
         }
@@ -133,7 +176,11 @@ public class TaskShellCommand {
             @ShellOption(value = {"-a", "--assignee"}, help = "Assignee ID", defaultValue = ShellOption.NULL) String assigneeId,
             @ShellOption(value = {"-s", "--status"}, help = "Status ID", defaultValue = ShellOption.NULL) String statusId,
             @ShellOption(value = {"-p", "--priority"}, help = "Priority ID", defaultValue = ShellOption.NULL) String priorityId,
-            @ShellOption(value = {"-due", "--due-date"}, help = "Due date (YYYY-MM-DD)", defaultValue = ShellOption.NULL) String dueDate
+            @ShellOption(value = {"-due", "--due-date"}, help = "Due date (YYYY-MM-DD)", defaultValue = ShellOption.NULL) String dueDate,
+            @ShellOption(value = {"-e", "--epic"}, help = "Epic ID", defaultValue = ShellOption.NULL) String epicId,
+            @ShellOption(value = {"-sp", "--sprint"}, help = "Sprint ID", defaultValue = ShellOption.NULL) String sprintId,
+            @ShellOption(value = {"-pts", "--story-points"}, help = "Story points", defaultValue = ShellOption.NULL) Integer storyPoints,
+            @ShellOption(value = {"-hrs", "--estimated-hours"}, help = "Estimated hours", defaultValue = ShellOption.NULL) Integer estimatedHours
     ) {
         try {
             shellService.printHeading("Updating task...");
@@ -148,15 +195,221 @@ public class TaskShellCommand {
             if (title != null) updatedTask.put("title", title);
             if (description != null) updatedTask.put("description", description);
             if (assigneeId != null) updatedTask.put("assignedToId", assigneeId);
-            if (statusId != null) updatedTask.put("statusId", statusId);
-            if (priorityId != null) updatedTask.put("priorityId", priorityId);
-            if (dueDate != null) updatedTask.put("dueDate", dueDate);
+            if (statusId != null) updatedTask.put("statusId", Integer.parseInt(statusId));
+            if (priorityId != null) updatedTask.put("priorityId", Integer.parseInt(priorityId));
+            if (dueDate != null) updatedTask.put("dueDate", parseDate(dueDate));
+            if (epicId != null) updatedTask.put("epicId", epicId);
+            if (sprintId != null) updatedTask.put("sprintId", sprintId);
+            if (storyPoints != null) updatedTask.put("storyPoints", storyPoints);
+            if (estimatedHours != null) updatedTask.put("estimatedHours", estimatedHours);
+
+            updatedTask.put("dueDate", parseDate(updatedTask.get("dueDate").toString()));
 
             apiService.put("/tasks/" + taskId, updatedTask, Object.class);
             shellService.printSuccess("Task updated successfully!");
 
         } catch (Exception e) {
             shellService.printError("Error updating task: " + e.getMessage());
+        }
+    }
+
+    @ShellMethod(key = "task-change-status", value = "Change task status")
+    @ShellMethodAvailability("isUserLoggedIn")
+    public void changeTaskStatus(
+            @ShellOption(help = "Task ID") String taskId,
+            @ShellOption(help = "Status ID") String statusId
+    ) {
+        try {
+            shellService.printHeading("Changing task status...");
+
+            Object updatedTask = apiService.patch("/tasks/" + taskId + "/status/" + statusId, null, Object.class);
+            shellService.printSuccess("Task status changed successfully!");
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> taskResult = (Map<String, Object>) updatedTask;
+            shellService.printInfo("New Status: " + taskResult.get("statusName"));
+
+        } catch (Exception e) {
+            shellService.printError("Error changing task status: " + e.getMessage());
+        }
+    }
+
+    @ShellMethod(key = "task-assign", value = "Assign task to user")
+    @ShellMethodAvailability("isUserLoggedIn")
+    public void assignTask(
+            @ShellOption(help = "Task ID") String taskId,
+            @ShellOption(help = "Assignee ID") String assigneeId
+    ) {
+        try {
+            shellService.printHeading("Assigning task...");
+
+            Object updatedTask = apiService.patch("/tasks/" + taskId + "/assign/" + assigneeId, null, Object.class);
+            shellService.printSuccess("Task assigned successfully!");
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> taskResult = (Map<String, Object>) updatedTask;
+            shellService.printInfo("Assigned to: " + taskResult.get("assignedToName"));
+
+        } catch (Exception e) {
+            shellService.printError("Error assigning task: " + e.getMessage());
+        }
+    }
+
+    @ShellMethod(key = "task-add-to-sprint", value = "Add task to sprint")
+    @ShellMethodAvailability("isUserLoggedIn")
+    public void addTaskToSprint(
+            @ShellOption(help = "Task ID") String taskId,
+            @ShellOption(help = "Sprint ID") String sprintId
+    ) {
+        try {
+            shellService.printHeading("Adding task to sprint...");
+
+            Object updatedTask = apiService.patch("/tasks/" + taskId + "/add-to-sprint/" + sprintId, null, Object.class);
+            shellService.printSuccess("Task added to sprint successfully!");
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> taskResult = (Map<String, Object>) updatedTask;
+            shellService.printInfo("Added to sprint: " + taskResult.get("sprintName"));
+
+        } catch (Exception e) {
+            shellService.printError("Error adding task to sprint: " + e.getMessage());
+        }
+    }
+
+    @ShellMethod(key = "task-remove-from-sprint", value = "Remove task from sprint")
+    @ShellMethodAvailability("isUserLoggedIn")
+    public void removeTaskFromSprint(
+            @ShellOption(help = "Task ID") String taskId
+    ) {
+        try {
+            shellService.printHeading("Removing task from sprint...");
+
+            Object updatedTask = apiService.patch("/tasks/" + taskId + "/remove-from-sprint", null, Object.class);
+            shellService.printSuccess("Task removed from sprint successfully!");
+
+        } catch (Exception e) {
+            shellService.printError("Error removing task from sprint: " + e.getMessage());
+        }
+    }
+
+    @ShellMethod(key = "task-add-to-epic", value = "Add task to epic")
+    @ShellMethodAvailability("isUserLoggedIn")
+    public void addTaskToEpic(
+            @ShellOption(help = "Task ID") String taskId,
+            @ShellOption(help = "Epic ID") String epicId
+    ) {
+        try {
+            shellService.printHeading("Adding task to epic...");
+
+            Object updatedTask = apiService.patch("/tasks/" + taskId + "/add-to-epic/" + epicId, null, Object.class);
+            shellService.printSuccess("Task added to epic successfully!");
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> taskResult = (Map<String, Object>) updatedTask;
+            shellService.printInfo("Added to epic: " + taskResult.get("epicName"));
+
+        } catch (Exception e) {
+            shellService.printError("Error adding task to epic: " + e.getMessage());
+        }
+    }
+
+    @ShellMethod(key = "task-remove-from-epic", value = "Remove task from epic")
+    @ShellMethodAvailability("isUserLoggedIn")
+    public void removeTaskFromEpic(
+            @ShellOption(help = "Task ID") String taskId
+    ) {
+        try {
+            shellService.printHeading("Removing task from epic...");
+
+            Object updatedTask = apiService.patch("/tasks/" + taskId + "/remove-from-epic", null, Object.class);
+            shellService.printSuccess("Task removed from epic successfully!");
+
+        } catch (Exception e) {
+            shellService.printError("Error removing task from epic: " + e.getMessage());
+        }
+    }
+
+    @ShellMethod(key = "task-filter", value = "Filter tasks")
+    @ShellMethodAvailability("isUserLoggedIn")
+    public void filterTasks(
+            @ShellOption(value = {"-a", "--assignee"}, help = "Assignee ID", defaultValue = ShellOption.NULL) String assigneeId,
+            @ShellOption(value = {"-s", "--status"}, help = "Status ID", defaultValue = ShellOption.NULL) String statusId,
+            @ShellOption(value = {"-p", "--priority"}, help = "Priority ID", defaultValue = ShellOption.NULL) String priorityId,
+            @ShellOption(value = {"-sp", "--sprint"}, help = "Sprint ID", defaultValue = ShellOption.NULL) String sprintId,
+            @ShellOption(value = {"-e", "--epic"}, help = "Epic ID", defaultValue = ShellOption.NULL) String epicId
+    ) {
+        try {
+            shellService.printHeading("Filtering tasks...");
+
+            Map<String, Object> filterParams = new HashMap<>();
+            if (assigneeId != null) filterParams.put("assignedToId", assigneeId);
+            if (statusId != null) filterParams.put("statusId", Integer.parseInt(statusId));
+            if (priorityId != null) filterParams.put("priorityId", Integer.parseInt(priorityId));
+            if (sprintId != null) filterParams.put("sprintId", sprintId);
+            if (epicId != null) filterParams.put("epicId", epicId);
+
+            Object[] tasks = apiService.post("/tasks/filter", filterParams, Object[].class);
+
+            if (tasks.length == 0) {
+                shellService.printInfo("No tasks found matching the filter criteria");
+            } else {
+                List<String[]> tableData = new ArrayList<>();
+
+                for (Object taskObj : tasks) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> task = (Map<String, Object>) taskObj;
+
+                    String[] row = new String[5];
+                    row[0] = String.valueOf(task.get("id"));
+                    row[1] = String.valueOf(task.get("title"));
+                    row[2] = String.valueOf(task.get("assignedToName"));
+                    row[3] = String.valueOf(task.get("statusName"));
+                    row[4] = String.valueOf(task.get("priorityName"));
+
+                    tableData.add(row);
+                }
+
+                String[] headers = {"ID", "Title", "Assigned To", "Status", "Priority"};
+                shellService.printTable(headers, tableData.toArray(new String[0][]));
+            }
+
+        } catch (Exception e) {
+            shellService.printError("Error filtering tasks: " + e.getMessage());
+        }
+    }
+
+    @ShellMethod(key = "task-my", value = "List my active tasks")
+    @ShellMethodAvailability("isUserLoggedIn")
+    public void getMyTasks() {
+        try {
+            shellService.printHeading("Fetching your active tasks...");
+
+            Object[] tasks = apiService.get("/tasks/my-tasks", Object[].class);
+
+            if (tasks.length == 0) {
+                shellService.printInfo("You have no active tasks");
+            } else {
+                List<String[]> tableData = new ArrayList<>();
+
+                for (Object taskObj : tasks) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> task = (Map<String, Object>) taskObj;
+
+                    String[] row = new String[4];
+                    row[0] = String.valueOf(task.get("id"));
+                    row[1] = String.valueOf(task.get("title"));
+                    row[2] = String.valueOf(task.get("statusName"));
+                    row[3] = String.valueOf(task.get("priorityName"));
+
+                    tableData.add(row);
+                }
+
+                String[] headers = {"ID", "Title", "Status", "Priority"};
+                shellService.printTable(headers, tableData.toArray(new String[0][]));
+            }
+
+        } catch (Exception e) {
+            shellService.printError("Error fetching your tasks: " + e.getMessage());
         }
     }
 

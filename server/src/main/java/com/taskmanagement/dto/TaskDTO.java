@@ -9,7 +9,7 @@ import java.time.ZonedDateTime;
 import java.util.UUID;
 
 public class TaskDTO {
-    private UUID id;
+    private Integer id;
 
     private UUID epicId;
 
@@ -21,7 +21,7 @@ public class TaskDTO {
     private UUID assignedToId;
 
     @NotNull(message = "Priority ID is required")
-    private UUID priorityId;
+    private Integer priorityId;
 
     @NotBlank(message = "Title is required")
     private String title;
@@ -30,7 +30,7 @@ public class TaskDTO {
     private String description;
 
     @NotNull(message = "Status ID is required")
-    private UUID statusId;
+    private Integer statusId;
 
     @Min(value = 0, message = "Story points must be a positive number")
     private int storyPoints;
@@ -39,10 +39,10 @@ public class TaskDTO {
     private int estimatedHours;
 
     @NotNull(message = "Due date is required")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private ZonedDateTime dueDate;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private ZonedDateTime completedAt;
 
     // Additional fields for display purposes
@@ -54,11 +54,11 @@ public class TaskDTO {
 
     // Getters and setters
 
-    public UUID getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -94,11 +94,11 @@ public class TaskDTO {
         this.assignedToId = assignedToId;
     }
 
-    public UUID getPriorityId() {
+    public Integer getPriorityId() {
         return priorityId;
     }
 
-    public void setPriorityId(UUID priorityId) {
+    public void setPriorityId(Integer priorityId) {
         this.priorityId = priorityId;
     }
 
@@ -118,11 +118,11 @@ public class TaskDTO {
         this.description = description;
     }
 
-    public UUID getStatusId() {
+    public Integer getStatusId() {
         return statusId;
     }
 
-    public void setStatusId(UUID statusId) {
+    public void setStatusId(Integer statusId) {
         this.statusId = statusId;
     }
 
