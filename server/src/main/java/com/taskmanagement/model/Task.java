@@ -8,7 +8,8 @@ import java.util.UUID;
 @Table(name = "tasks")
 public class Task {
     @Id
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "epic_id")
@@ -60,7 +61,6 @@ public class Task {
 
     @PrePersist
     protected void onCreate() {
-        id = UUID.randomUUID();
         createdAt = updatedAt = ZonedDateTime.now();
     }
 
@@ -71,11 +71,11 @@ public class Task {
 
     // Getters and Setters
 
-    public UUID getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

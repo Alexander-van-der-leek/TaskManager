@@ -105,7 +105,7 @@ public class TaskController {
 
     @GetMapping("/{id}")
     public ResponseEntity<TaskDTO> getTaskById(
-            @PathVariable UUID id,
+            @PathVariable Integer id,
             @AuthenticationPrincipal UserDetails userDetails) {
         UUID userId = UUID.fromString(userDetails.getUsername());
         logger.info("User {} requesting task {}", userId, id);
@@ -122,11 +122,8 @@ public class TaskController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('SCRUM_MASTER') or hasRole('PRODUCT_OWNER') or "
-            + "authentication.name == @taskRepository.findById(#id).orElse(new com.taskmanagement.model.Task()).getCreatedBy().getId().toString() or "
-            + "authentication.name == @taskRepository.findById(#id).orElse(new com.taskmanagement.model.Task()).getAssignedTo().getId().toString()")
     public ResponseEntity<TaskDTO> updateTask(
-            @PathVariable UUID id,
+            @PathVariable Integer id,
             @Valid @RequestBody TaskDTO taskDTO,
             @AuthenticationPrincipal UserDetails userDetails) {
         UUID userId = UUID.fromString(userDetails.getUsername());
@@ -136,12 +133,9 @@ public class TaskController {
     }
 
     @PatchMapping("/{id}/status/{statusId}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('SCRUM_MASTER') or "
-            + "authentication.name == @taskRepository.findById(#id).orElse(new com.taskmanagement.model.Task()).getCreatedBy().getId().toString() or "
-            + "authentication.name == @taskRepository.findById(#id).orElse(new com.taskmanagement.model.Task()).getAssignedTo().getId().toString()")
     public ResponseEntity<TaskDTO> changeTaskStatus(
-            @PathVariable UUID id,
-            @PathVariable UUID statusId,
+            @PathVariable Integer id,
+            @PathVariable Integer statusId,
             @AuthenticationPrincipal UserDetails userDetails) {
         UUID userId = UUID.fromString(userDetails.getUsername());
         logger.info("User {} changing status of task {} to status {}", userId, id, statusId);
@@ -149,11 +143,8 @@ public class TaskController {
     }
 
     @PatchMapping("/{id}/assign/{assigneeId}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('SCRUM_MASTER') or hasRole('PRODUCT_OWNER') or "
-            + "authentication.name == @taskRepository.findById(#id).orElse(new com.taskmanagement.model.Task()).getCreatedBy().getId().toString() or "
-            + "authentication.name == @taskRepository.findById(#id).orElse(new com.taskmanagement.model.Task()).getAssignedTo().getId().toString()")
     public ResponseEntity<TaskDTO> assignTask(
-            @PathVariable UUID id,
+            @PathVariable Integer id,
             @PathVariable UUID assigneeId,
             @AuthenticationPrincipal UserDetails userDetails) {
         UUID userId = UUID.fromString(userDetails.getUsername());
@@ -164,7 +155,7 @@ public class TaskController {
     @PatchMapping("/{id}/add-to-sprint/{sprintId}")
     @PreAuthorize("hasRole('SCRUM_MASTER') or hasRole('ADMIN') or hasRole('PRODUCT_OWNER')")
     public ResponseEntity<TaskDTO> addTaskToSprint(
-            @PathVariable UUID id,
+            @PathVariable Integer id,
             @PathVariable UUID sprintId,
             @AuthenticationPrincipal UserDetails userDetails) {
         UUID userId = UUID.fromString(userDetails.getUsername());
@@ -175,7 +166,7 @@ public class TaskController {
     @PatchMapping("/{id}/remove-from-sprint")
     @PreAuthorize("hasRole('SCRUM_MASTER') or hasRole('ADMIN') or hasRole('PRODUCT_OWNER')")
     public ResponseEntity<TaskDTO> removeTaskFromSprint(
-            @PathVariable UUID id,
+            @PathVariable Integer id,
             @AuthenticationPrincipal UserDetails userDetails) {
         UUID userId = UUID.fromString(userDetails.getUsername());
         logger.info("User {} removing task {} from sprint", userId, id);
@@ -185,7 +176,7 @@ public class TaskController {
     @PatchMapping("/{id}/add-to-epic/{epicId}")
     @PreAuthorize("hasRole('PRODUCT_OWNER') or hasRole('ADMIN')")
     public ResponseEntity<TaskDTO> addTaskToEpic(
-            @PathVariable UUID id,
+            @PathVariable Integer id,
             @PathVariable UUID epicId,
             @AuthenticationPrincipal UserDetails userDetails) {
         UUID userId = UUID.fromString(userDetails.getUsername());
@@ -196,7 +187,7 @@ public class TaskController {
     @PatchMapping("/{id}/remove-from-epic")
     @PreAuthorize("hasRole('PRODUCT_OWNER') or hasRole('ADMIN')")
     public ResponseEntity<TaskDTO> removeTaskFromEpic(
-            @PathVariable UUID id,
+            @PathVariable Integer id,
             @AuthenticationPrincipal UserDetails userDetails) {
         UUID userId = UUID.fromString(userDetails.getUsername());
         logger.info("User {} removing task {} from epic", userId, id);
@@ -204,9 +195,8 @@ public class TaskController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('SCRUM_MASTER') or hasRole('ADMIN') or @taskSecurityService.canDeleteTask(#id, authentication)")
     public ResponseEntity<Void> deleteTask(
-            @PathVariable UUID id,
+            @PathVariable Integer id,
             @AuthenticationPrincipal UserDetails userDetails) {
         UUID userId = UUID.fromString(userDetails.getUsername());
         logger.info("User {} deleting task {}", userId, id);

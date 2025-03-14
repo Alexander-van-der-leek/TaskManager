@@ -11,7 +11,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -27,6 +30,7 @@ public class TaskService {
     private final SprintRepository sprintRepository;
     private final TaskStatusRepository statusRepository;
     private final TaskPriorityRepository priorityRepository;
+    private final TaskCustomRepository taskCustomRepository;
 
     public TaskService(
             TaskRepository taskRepository,
@@ -34,13 +38,34 @@ public class TaskService {
             EpicRepository epicRepository,
             SprintRepository sprintRepository,
             TaskStatusRepository statusRepository,
-            TaskPriorityRepository priorityRepository) {
+            TaskPriorityRepository priorityRepository,
+            TaskCustomRepository taskCustomRepository) {
         this.taskRepository = taskRepository;
         this.userRepository = userRepository;
         this.epicRepository = epicRepository;
         this.sprintRepository = sprintRepository;
         this.statusRepository = statusRepository;
         this.priorityRepository = priorityRepository;
+        this.taskCustomRepository = taskCustomRepository;
+    }
+
+    private ZonedDateTime parseDate(String dateStr) {
+        if (dateStr == null || dateStr.trim().isEmpty()) {
+            return null;
+        }
+
+        try {
+            // Try parsing as simple date (yyyy-MM-dd)
+            LocalDate localDate = LocalDate.parse(dateStr);
+            return localDate.atStartOfDay(ZoneId.systemDefault());
+        } catch (DateTimeParseException e) {
+            try {
+                // If that fails, try the full ZonedDateTime format
+                return ZonedDateTime.parse(dateStr);
+            } catch (DateTimeParseException ex) {
+                throw new IllegalArgumentException("Invalid date format. Please use yyyy-MM-dd format.", ex);
+            }
+        }
     }
 
     @Transactional(readOnly = true)
@@ -51,14 +76,20 @@ public class TaskService {
                 .collect(Collectors.toList());
     }
 
+
     @Transactional(readOnly = true)
     public List<TaskDTO> getTasksByFilter(TaskFilterDTO filterDTO, UUID userId) {
         logger.debug("Fetching tasks by filter for user: {}", userId);
 
-        List<Task> filteredTasks = taskRepository.findTasksByFilters(
+        Integer statusId = filterDTO.getStatusId();
+        Integer priorityId = filterDTO.getPriorityId();
+
+        logger.debug("Params: statusId={}, priorityId={}", statusId, priorityId);
+
+        List<Task> filteredTasks = taskCustomRepository.findTasksByFilters(
                 filterDTO.getAssignedToId(),
-                filterDTO.getStatusId(),
-                filterDTO.getPriorityId(),
+                statusId,
+                priorityId,
                 filterDTO.getSprintId(),
                 filterDTO.getEpicId()
         );
@@ -137,7 +168,7 @@ public class TaskService {
     }
 
     @Transactional(readOnly = true)
-    public TaskDTO getTaskById(UUID id, UUID userId) {
+    public TaskDTO getTaskById(Integer id, UUID userId) {
         logger.debug("Fetching task: {} for user: {}", id, userId);
 
         Task task = taskRepository.findById(id)
@@ -204,6 +235,18 @@ public class TaskService {
         Task existingTask = taskRepository.findById(taskDTO.getId())
                 .orElseThrow(() -> new ResourceNotFound("Task not found with id: " + taskDTO.getId()));
 
+        User updater = userRepository.findById(updaterId)
+                .orElseThrow(() -> new ResourceNotFound("User not found with id: " + updaterId));
+
+        boolean isAdmin = updater.getRole().getName().equals("ADMIN");
+        boolean isScrumMaster = updater.getRole().getName().equals("SCRUM_MASTER");
+        boolean isCreator = existingTask.getCreatedBy().getId().equals(updaterId);
+        boolean isAssignee = existingTask.getAssignedTo().getId().equals(updaterId);
+
+        if (!(isAdmin || isScrumMaster || isCreator || isAssignee)) {
+            throw new UnauthorizedAccessException("You don't have permission to update this task");
+        }
+
         User assignee = userRepository.findById(taskDTO.getAssignedToId())
                 .orElseThrow(() -> new ResourceNotFound("Assigned user not found with id: " + taskDTO.getAssignedToId()));
 
@@ -254,11 +297,23 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskDTO changeTaskStatus(UUID taskId, UUID statusId, UUID userId) {
+    public TaskDTO changeTaskStatus(Integer taskId, Integer statusId, UUID userId) {
         logger.debug("Changing status of task: {} to status: {} by user: {}", taskId, statusId, userId);
 
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFound("Task not found with id: " + taskId));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFound("User not found with id: " + userId));
+
+        boolean isAdmin = user.getRole().getName().equals("ADMIN");
+        boolean isScrumMaster = user.getRole().getName().equals("SCRUM_MASTER");
+        boolean isCreator = task.getCreatedBy().getId().equals(userId);
+        boolean isAssignee = task.getAssignedTo().getId().equals(userId);
+
+        if (!(isAdmin || isScrumMaster || isCreator || isAssignee)) {
+            throw new UnauthorizedAccessException("You don't have permission to change the status of this task");
+        }
 
         TaskStatus newStatus = statusRepository.findById(statusId)
                 .orElseThrow(() -> new ResourceNotFound("Status not found with id: " + statusId));
@@ -285,7 +340,7 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskDTO assignTask(UUID taskId, UUID assigneeId, UUID userId) {
+    public TaskDTO assignTask(Integer taskId, UUID assigneeId, UUID userId) {
         logger.debug("Assigning task: {} to user: {} by user: {}", taskId, assigneeId, userId);
 
         Task task = taskRepository.findById(taskId)
@@ -293,6 +348,19 @@ public class TaskService {
 
         User assignee = userRepository.findById(assigneeId)
                 .orElseThrow(() -> new ResourceNotFound("User not found with id: " + assigneeId));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFound("User not found with id: " + userId));
+
+        boolean isAdmin = user.getRole().getName().equals("ADMIN");
+        boolean isScrumMaster = user.getRole().getName().equals("SCRUM_MASTER");
+        boolean isProductOwner = user.getRole().getName().equals("PRODUCT_OWNER");
+        boolean isCreator = task.getCreatedBy().getId().equals(userId);
+        boolean isAssignee = task.getAssignedTo().getId().equals(userId);
+
+        if (!(isAdmin || isScrumMaster || isProductOwner || isCreator || isAssignee)) {
+            throw new UnauthorizedAccessException("You don't have permission to assign this task");
+        }
 
         // Save old assignee for logging
         UUID oldAssigneeId = task.getAssignedTo().getId();
@@ -308,7 +376,7 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskDTO addTaskToSprint(UUID taskId, UUID sprintId, UUID userId) {
+    public TaskDTO addTaskToSprint(Integer taskId, UUID sprintId, UUID userId) {
         logger.debug("Adding task: {} to sprint: {} by user: {}", taskId, sprintId, userId);
 
         Task task = taskRepository.findById(taskId)
@@ -337,7 +405,7 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskDTO removeTaskFromSprint(UUID taskId, UUID userId) {
+    public TaskDTO removeTaskFromSprint(Integer taskId, UUID userId) {
         logger.debug("Removing task: {} from sprint by user: {}", taskId, userId);
 
         Task task = taskRepository.findById(taskId)
@@ -362,7 +430,7 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskDTO addTaskToEpic(UUID taskId, UUID epicId, UUID userId) {
+    public TaskDTO addTaskToEpic(Integer taskId, UUID epicId, UUID userId) {
         logger.debug("Adding task: {} to epic: {} by user: {}", taskId, epicId, userId);
 
         Task task = taskRepository.findById(taskId)
@@ -385,7 +453,7 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskDTO removeTaskFromEpic(UUID taskId, UUID userId) {
+    public TaskDTO removeTaskFromEpic(Integer taskId, UUID userId) {
         logger.debug("Removing task: {} from epic by user: {}", taskId, userId);
 
         Task task = taskRepository.findById(taskId)
@@ -410,11 +478,23 @@ public class TaskService {
     }
 
     @Transactional
-    public void deleteTask(UUID id, UUID deleterId) {
+    public void deleteTask(Integer id, UUID deleterId) {
         logger.debug("Deleting task: {} by user: {}", id, deleterId);
 
-        if (!taskRepository.existsById(id)) {
-            throw new ResourceNotFound("Task not found with id: " + id);
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFound("Task not found with id: " + id));
+
+        User deleter = userRepository.findById(deleterId)
+                .orElseThrow(() -> new ResourceNotFound("User not found with id: " + deleterId));
+
+        boolean isAdmin = deleter.getRole().getName().equals("ADMIN");
+        boolean isScrumMaster = deleter.getRole().getName().equals("SCRUM_MASTER");
+        boolean isCreator = task.getCreatedBy().getId().equals(deleterId);
+        boolean isBacklog = "BACKLOG".equals(task.getStatus().getName());
+
+        // Allow deletion if user is admin, scrum master, or if they are the creator and task is in backlog
+        if (!(isAdmin || isScrumMaster || (isCreator && isBacklog))) {
+            throw new UnauthorizedAccessException("You don't have permission to delete this task");
         }
 
         // Authorization is handled by @PreAuthorize on the controller and TaskSecurity service

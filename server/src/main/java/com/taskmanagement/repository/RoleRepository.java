@@ -9,6 +9,6 @@ import org.springframework.stereotype.Repository;
 import com.taskmanagement.model.Role;
 
 @Repository
-public interface RoleRepository extends JpaRepository<Role, UUID> {
+public interface RoleRepository extends JpaRepository<Role, Integer> {
     Optional<Role> findByName(String name);
 }

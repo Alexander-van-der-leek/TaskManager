@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 import com.taskmanagement.model.TaskPriority;
 
 @Repository
-public interface TaskPriorityRepository extends JpaRepository<TaskPriority, UUID> {
+public interface TaskPriorityRepository extends JpaRepository<TaskPriority, Integer> {
     // Query methods will be implemented later
 }

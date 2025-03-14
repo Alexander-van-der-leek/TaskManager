@@ -8,7 +8,8 @@ import java.util.UUID;
 @Table(name = "task_statuses")
 public class TaskStatus {
     @Id
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
     @Column(nullable = false, unique = true)
     private String name;
@@ -19,11 +20,11 @@ public class TaskStatus {
 
     // Getters and Setters
 
-    public UUID getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

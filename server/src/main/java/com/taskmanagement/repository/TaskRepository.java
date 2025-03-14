@@ -13,7 +13,7 @@ import com.taskmanagement.model.Task;
 import com.taskmanagement.model.User;
 
 @Repository
-public interface TaskRepository extends JpaRepository<Task, UUID> {
+public interface TaskRepository extends JpaRepository<Task, Integer> {
     // Find tasks by assigned user
     List<Task> findByAssignedTo(User assignedTo);
 
@@ -40,21 +40,7 @@ public interface TaskRepository extends JpaRepository<Task, UUID> {
     @Query("SELECT t FROM Task t WHERE t.assignedTo.id = :userId AND (t.status.name != 'DONE' OR t.completedAt IS NULL)")
     List<Task> findUserActiveTasks(@Param("userId") UUID userId);
 
-    // Find tasks by multiple filters
-    @Query("SELECT t FROM Task t " +
-            "WHERE (:assignedToId IS NULL OR t.assignedTo.id = :assignedToId) " +
-            "AND (:statusId IS NULL OR t.status.id = :statusId) " +
-            "AND (:priorityId IS NULL OR t.priority.id = :priorityId) " +
-            "AND (:sprintId IS NULL OR t.sprint.id = :sprintId) " +
-            "AND (:epicId IS NULL OR t.epic.id = :epicId)")
-    List<Task> findTasksByFilters(
-            @Param("assignedToId") UUID assignedToId,
-            @Param("statusId") UUID statusId,
-            @Param("priorityId") UUID priorityId,
-            @Param("sprintId") UUID sprintId,
-            @Param("epicId") UUID epicId);
-
     // Count tasks by status for sprint
     @Query("SELECT COUNT(t) FROM Task t WHERE t.sprint.id = :sprintId AND t.status.id = :statusId")
-    long countTasksBySprintAndStatus(@Param("sprintId") UUID sprintId, @Param("statusId") UUID statusId);
+    long countTasksBySprintAndStatus(@Param("sprintId") UUID sprintId, @Param("statusId") Integer statusId);
 }

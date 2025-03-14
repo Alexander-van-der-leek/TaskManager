@@ -10,6 +10,10 @@ import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +21,25 @@ import java.util.Map;
 
 @ShellComponent
 public class TaskShellCommand {
+
+    private ZonedDateTime parseDate(String dateStr) {
+        if (dateStr == null || dateStr.trim().isEmpty()) {
+            return null;
+        }
+
+        try {
+            // Try parsing as simple date (yyyy-MM-dd)
+            LocalDate localDate = LocalDate.parse(dateStr);
+            return localDate.atStartOfDay(ZoneId.systemDefault());
+        } catch (DateTimeParseException e) {
+            try {
+                // If that fails, try the full ZonedDateTime format
+                return ZonedDateTime.parse(dateStr);
+            } catch (DateTimeParseException ex) {
+                throw new IllegalArgumentException("Invalid date format. Please use yyyy-MM-dd format.", ex);
+            }
+        }
+    }
 
     @Autowired
     private APIService apiService;
@@ -83,9 +106,9 @@ public class TaskShellCommand {
             task.put("title", title);
             task.put("description", description);
             task.put("assignedToId", assigneeId);
-            task.put("statusId", statusId);
-            task.put("priorityId", priorityId);
-            task.put("dueDate", dueDate);
+            task.put("statusId", Integer.parseInt(statusId));
+            task.put("priorityId", Integer.parseInt(priorityId));
+            task.put("dueDate", parseDate(dueDate));
             task.put("storyPoints", storyPoints);
             task.put("estimatedHours", estimatedHours);
 
@@ -172,13 +195,15 @@ public class TaskShellCommand {
             if (title != null) updatedTask.put("title", title);
             if (description != null) updatedTask.put("description", description);
             if (assigneeId != null) updatedTask.put("assignedToId", assigneeId);
-            if (statusId != null) updatedTask.put("statusId", statusId);
-            if (priorityId != null) updatedTask.put("priorityId", priorityId);
-            if (dueDate != null) updatedTask.put("dueDate", dueDate);
+            if (statusId != null) updatedTask.put("statusId", Integer.parseInt(statusId));
+            if (priorityId != null) updatedTask.put("priorityId", Integer.parseInt(priorityId));
+            if (dueDate != null) updatedTask.put("dueDate", parseDate(dueDate));
             if (epicId != null) updatedTask.put("epicId", epicId);
             if (sprintId != null) updatedTask.put("sprintId", sprintId);
             if (storyPoints != null) updatedTask.put("storyPoints", storyPoints);
             if (estimatedHours != null) updatedTask.put("estimatedHours", estimatedHours);
+
+            updatedTask.put("dueDate", parseDate(updatedTask.get("dueDate").toString()));
 
             apiService.put("/tasks/" + taskId, updatedTask, Object.class);
             shellService.printSuccess("Task updated successfully!");
@@ -318,8 +343,8 @@ public class TaskShellCommand {
 
             Map<String, Object> filterParams = new HashMap<>();
             if (assigneeId != null) filterParams.put("assignedToId", assigneeId);
-            if (statusId != null) filterParams.put("statusId", statusId);
-            if (priorityId != null) filterParams.put("priorityId", priorityId);
+            if (statusId != null) filterParams.put("statusId", Integer.parseInt(statusId));
+            if (priorityId != null) filterParams.put("priorityId", Integer.parseInt(priorityId));
             if (sprintId != null) filterParams.put("sprintId", sprintId);
             if (epicId != null) filterParams.put("epicId", epicId);
 

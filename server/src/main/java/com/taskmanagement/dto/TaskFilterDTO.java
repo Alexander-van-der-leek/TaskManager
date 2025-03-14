@@ -4,15 +4,15 @@ import java.util.UUID;
 
 public class TaskFilterDTO {
     private UUID assignedToId;
-    private UUID statusId;
-    private UUID priorityId;
+    private Integer statusId;
+    private Integer priorityId;
     private UUID sprintId;
     private UUID epicId;
 
     public TaskFilterDTO() {
     }
 
-    public TaskFilterDTO(UUID assignedToId, UUID statusId, UUID priorityId, UUID sprintId, UUID epicId) {
+    public TaskFilterDTO(UUID assignedToId, Integer statusId, Integer priorityId, UUID sprintId, UUID epicId) {
         this.assignedToId = assignedToId;
         this.statusId = statusId;
         this.priorityId = priorityId;
@@ -28,19 +28,19 @@ public class TaskFilterDTO {
         this.assignedToId = assignedToId;
     }
 
-    public UUID getStatusId() {
+    public Integer getStatusId() {
         return statusId;
     }
 
-    public void setStatusId(UUID statusId) {
+    public void setStatusId(Integer statusId) {
         this.statusId = statusId;
     }
 
-    public UUID getPriorityId() {
+    public Integer getPriorityId() {
         return priorityId;
     }
 
-    public void setPriorityId(UUID priorityId) {
+    public void setPriorityId(Integer priorityId) {
         this.priorityId = priorityId;
     }
 
