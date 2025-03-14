@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Scanner;
 
 @ShellComponent
-public class SignInShellCommand {
+public class LoginShellCommand {
 
     @Autowired
     private OAuthService oAuthService;
@@ -29,8 +29,8 @@ public class SignInShellCommand {
     @Autowired
     private ShellService shellService;
 
-    @ShellMethod(key = "Signin", value = "Authenticate with Google")
-    public void signin(@ShellOption(value = {"--headless"}, help = "Run in headless mode (provide token manually)", defaultValue = "false") boolean headless) {
+    @ShellMethod(key = "login", value = "Authenticate with Google")
+    public void login(@ShellOption(value = {"--headless"}, help = "Run in headless mode (provide token manually)", defaultValue = "false") boolean headless) {
         try {
             shellService.printInfo("Starting authentication with Google...");
 
