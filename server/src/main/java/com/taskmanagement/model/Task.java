@@ -1,9 +1,12 @@
 package com.taskmanagement.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
+
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
+@Data
 @Entity
 @Table(name = "tasks")
 public class Task {
@@ -69,125 +72,4 @@ public class Task {
         updatedAt = ZonedDateTime.now();
     }
 
-    // Getters and Setters
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Epic getEpic() {
-        return epic;
-    }
-
-    public void setEpic(Epic epic) {
-        this.epic = epic;
-    }
-
-    public Sprint getSprint() {
-        return sprint;
-    }
-
-    public void setSprint(Sprint sprint) {
-        this.sprint = sprint;
-    }
-
-    public User getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(User createdBy) {
-        this.createdBy = createdBy;
-    }
-
-    public User getAssignedTo() {
-        return assignedTo;
-    }
-
-    public void setAssignedTo(User assignedTo) {
-        this.assignedTo = assignedTo;
-    }
-
-    public TaskPriority getPriority() {
-        return priority;
-    }
-
-    public void setPriority(TaskPriority priority) {
-        this.priority = priority;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public TaskStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(TaskStatus status) {
-        this.status = status;
-    }
-
-    public int getStoryPoints() {
-        return storyPoints;
-    }
-
-    public void setStoryPoints(int storyPoints) {
-        this.storyPoints = storyPoints;
-    }
-
-    public int getEstimatedHours() {
-        return estimatedHours;
-    }
-
-    public void setEstimatedHours(int estimatedHours) {
-        this.estimatedHours = estimatedHours;
-    }
-
-    public ZonedDateTime getDueDate() {
-        return dueDate;
-    }
-
-    public void setDueDate(ZonedDateTime dueDate) {
-        this.dueDate = dueDate;
-    }
-
-    public ZonedDateTime getCompletedAt() {
-        return completedAt;
-    }
-
-    public void setCompletedAt(ZonedDateTime completedAt) {
-        this.completedAt = completedAt;
-    }
-
-    public ZonedDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(ZonedDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public ZonedDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(ZonedDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
 }
