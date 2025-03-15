@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
 @Repository
-public interface EpicRepository extends JpaRepository<Epic, UUID> {
+public interface EpicRepository extends JpaRepository<Epic, Integer> {
 
 }

@@ -25,10 +25,10 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
     List<Task> findByStatusName(@Param("statusName") String statusName);
 
     // Find tasks by epic id
-    List<Task> findByEpicId(UUID epicId);
+    List<Task> findByEpicId(Integer epicId);
 
     // Find tasks by sprint id
-    List<Task> findBySprintId(UUID sprintId);
+    List<Task> findBySprintId(Integer sprintId);
 
     // Find overdue tasks
     List<Task> findByDueDateBeforeAndCompletedAtIsNull(ZonedDateTime now);
@@ -42,5 +42,5 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
 
     // Count tasks by status for sprint
     @Query("SELECT COUNT(t) FROM Task t WHERE t.sprint.id = :sprintId AND t.status.id = :statusId")
-    long countTasksBySprintAndStatus(@Param("sprintId") UUID sprintId, @Param("statusId") Integer statusId);
+    long countTasksBySprintAndStatus(@Param("sprintId") Integer sprintId, @Param("statusId") Integer statusId);
 }

@@ -121,7 +121,7 @@ public class TaskService {
     }
 
     @Transactional(readOnly = true)
-    public List<TaskDTO> getTasksByEpic(UUID epicId, UUID userId) {
+    public List<TaskDTO> getTasksByEpic(Integer epicId, UUID userId) {
         logger.debug("Fetching tasks for epic: {}", epicId);
 
         if (!epicRepository.existsById(epicId)) {
@@ -134,7 +134,7 @@ public class TaskService {
     }
 
     @Transactional(readOnly = true)
-    public List<TaskDTO> getTasksBySprint(UUID sprintId, UUID userId) {
+    public List<TaskDTO> getTasksBySprint(Integer sprintId, UUID userId) {
         logger.debug("Fetching tasks for sprint: {}", sprintId);
 
         if (!sprintRepository.existsById(sprintId)) {
@@ -147,7 +147,7 @@ public class TaskService {
     }
 
     @Transactional(readOnly = true)
-    public Map<String, Long> getSprintStats(UUID sprintId, UUID userId) {
+    public Map<String, Long> getSprintStats(Integer sprintId, UUID userId) {
         logger.debug("Calculating sprint statistics for sprint: {}", sprintId);
 
         if (!sprintRepository.existsById(sprintId)) {
@@ -376,7 +376,7 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskDTO addTaskToSprint(Integer taskId, UUID sprintId, UUID userId) {
+    public TaskDTO addTaskToSprint(Integer taskId, Integer sprintId, UUID userId) {
         logger.debug("Adding task: {} to sprint: {} by user: {}", taskId, sprintId, userId);
 
         Task task = taskRepository.findById(taskId)
@@ -392,7 +392,7 @@ public class TaskService {
         }
 
         // Save the previous sprint ID for logging
-        UUID previousSprintId = task.getSprint() != null ? task.getSprint().getId() : null;
+        Integer previousSprintId = task.getSprint() != null ? task.getSprint().getId() : null;
 
         // Update task with new sprint
         task.setSprint(sprint);
@@ -418,7 +418,7 @@ public class TaskService {
         }
 
         // Save the previous sprint ID for logging
-        UUID previousSprintId = task.getSprint().getId();
+        Integer previousSprintId = task.getSprint().getId();
 
         // Remove task from sprint
         task.setSprint(null);
@@ -430,7 +430,7 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskDTO addTaskToEpic(Integer taskId, UUID epicId, UUID userId) {
+    public TaskDTO addTaskToEpic(Integer taskId, Integer epicId, UUID userId) {
         logger.debug("Adding task: {} to epic: {} by user: {}", taskId, epicId, userId);
 
         Task task = taskRepository.findById(taskId)
@@ -440,7 +440,7 @@ public class TaskService {
                 .orElseThrow(() -> new ResourceNotFound("Epic not found with id: " + epicId));
 
         // Save the previous epic ID for logging
-        UUID previousEpicId = task.getEpic() != null ? task.getEpic().getId() : null;
+        Integer previousEpicId = task.getEpic() != null ? task.getEpic().getId() : null;
 
         // Update task with new epic
         task.setEpic(epic);
@@ -466,7 +466,7 @@ public class TaskService {
         }
 
         // Save the previous epic ID for logging
-        UUID previousEpicId = task.getEpic().getId();
+        Integer previousEpicId = task.getEpic().getId();
 
         // Remove task from epic
         task.setEpic(null);

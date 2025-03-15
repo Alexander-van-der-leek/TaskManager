@@ -90,11 +90,11 @@ public class TaskShellCommand {
             @ShellOption(value = {"-t", "--title"}, help = "Task title") String title,
             @ShellOption(value = {"-d", "--desc"}, help = "Task description") String description,
             @ShellOption(value = {"-a", "--assignee"}, help = "Assignee ID") String assigneeId,
-            @ShellOption(value = {"-s", "--status"}, help = "Status ID") String statusId,
-            @ShellOption(value = {"-p", "--priority"}, help = "Priority ID") String priorityId,
+            @ShellOption(value = {"-s", "--status"}, help = "Status ID") Integer statusId,
+            @ShellOption(value = {"-p", "--priority"}, help = "Priority ID") Integer priorityId,
             @ShellOption(value = {"-due", "--due-date"}, help = "Due date (YYYY-MM-DD)") String dueDate,
-            @ShellOption(value = {"-e", "--epic"}, help = "Epic ID", defaultValue = ShellOption.NULL) String epicId,
-            @ShellOption(value = {"-sp", "--sprint"}, help = "Sprint ID", defaultValue = ShellOption.NULL) String sprintId,
+            @ShellOption(value = {"-e", "--epic"}, help = "Epic ID", defaultValue = ShellOption.NULL) Integer epicId,
+            @ShellOption(value = {"-sp", "--sprint"}, help = "Sprint ID", defaultValue = ShellOption.NULL) Integer sprintId,
             @ShellOption(value = {"-pts", "--story-points"}, help = "Story points", defaultValue = "0") Integer storyPoints,
             @ShellOption(value = {"-hrs", "--estimated-hours"}, help = "Estimated hours", defaultValue = "0") Integer estimatedHours
     ) {
@@ -106,8 +106,8 @@ public class TaskShellCommand {
             task.put("title", title);
             task.put("description", description);
             task.put("assignedToId", assigneeId);
-            task.put("statusId", Integer.parseInt(statusId));
-            task.put("priorityId", Integer.parseInt(priorityId));
+            task.put("statusId", statusId);
+            task.put("priorityId", priorityId);
             task.put("dueDate", parseDate(dueDate));
             task.put("storyPoints", storyPoints);
             task.put("estimatedHours", estimatedHours);
@@ -174,11 +174,11 @@ public class TaskShellCommand {
             @ShellOption(value = {"-t", "--title"}, help = "Task title", defaultValue = ShellOption.NULL) String title,
             @ShellOption(value = {"-d", "--desc"}, help = "Task description", defaultValue = ShellOption.NULL) String description,
             @ShellOption(value = {"-a", "--assignee"}, help = "Assignee ID", defaultValue = ShellOption.NULL) String assigneeId,
-            @ShellOption(value = {"-s", "--status"}, help = "Status ID", defaultValue = ShellOption.NULL) String statusId,
-            @ShellOption(value = {"-p", "--priority"}, help = "Priority ID", defaultValue = ShellOption.NULL) String priorityId,
+            @ShellOption(value = {"-s", "--status"}, help = "Status ID", defaultValue = ShellOption.NULL) Integer statusId,
+            @ShellOption(value = {"-p", "--priority"}, help = "Priority ID", defaultValue = ShellOption.NULL) Integer priorityId,
             @ShellOption(value = {"-due", "--due-date"}, help = "Due date (YYYY-MM-DD)", defaultValue = ShellOption.NULL) String dueDate,
-            @ShellOption(value = {"-e", "--epic"}, help = "Epic ID", defaultValue = ShellOption.NULL) String epicId,
-            @ShellOption(value = {"-sp", "--sprint"}, help = "Sprint ID", defaultValue = ShellOption.NULL) String sprintId,
+            @ShellOption(value = {"-e", "--epic"}, help = "Epic ID", defaultValue = ShellOption.NULL) Integer epicId,
+            @ShellOption(value = {"-sp", "--sprint"}, help = "Sprint ID", defaultValue = ShellOption.NULL) Integer sprintId,
             @ShellOption(value = {"-pts", "--story-points"}, help = "Story points", defaultValue = ShellOption.NULL) Integer storyPoints,
             @ShellOption(value = {"-hrs", "--estimated-hours"}, help = "Estimated hours", defaultValue = ShellOption.NULL) Integer estimatedHours
     ) {
@@ -195,8 +195,8 @@ public class TaskShellCommand {
             if (title != null) updatedTask.put("title", title);
             if (description != null) updatedTask.put("description", description);
             if (assigneeId != null) updatedTask.put("assignedToId", assigneeId);
-            if (statusId != null) updatedTask.put("statusId", Integer.parseInt(statusId));
-            if (priorityId != null) updatedTask.put("priorityId", Integer.parseInt(priorityId));
+            if (statusId != null) updatedTask.put("statusId", statusId);
+            if (priorityId != null) updatedTask.put("priorityId", priorityId);
             if (dueDate != null) updatedTask.put("dueDate", parseDate(dueDate));
             if (epicId != null) updatedTask.put("epicId", epicId);
             if (sprintId != null) updatedTask.put("sprintId", sprintId);
@@ -333,18 +333,18 @@ public class TaskShellCommand {
     @ShellMethodAvailability("isUserLoggedIn")
     public void filterTasks(
             @ShellOption(value = {"-a", "--assignee"}, help = "Assignee ID", defaultValue = ShellOption.NULL) String assigneeId,
-            @ShellOption(value = {"-s", "--status"}, help = "Status ID", defaultValue = ShellOption.NULL) String statusId,
-            @ShellOption(value = {"-p", "--priority"}, help = "Priority ID", defaultValue = ShellOption.NULL) String priorityId,
-            @ShellOption(value = {"-sp", "--sprint"}, help = "Sprint ID", defaultValue = ShellOption.NULL) String sprintId,
-            @ShellOption(value = {"-e", "--epic"}, help = "Epic ID", defaultValue = ShellOption.NULL) String epicId
+            @ShellOption(value = {"-s", "--status"}, help = "Status ID", defaultValue = ShellOption.NULL) Integer statusId,
+            @ShellOption(value = {"-p", "--priority"}, help = "Priority ID", defaultValue = ShellOption.NULL) Integer priorityId,
+            @ShellOption(value = {"-sp", "--sprint"}, help = "Sprint ID", defaultValue = ShellOption.NULL) Integer sprintId,
+            @ShellOption(value = {"-e", "--epic"}, help = "Epic ID", defaultValue = ShellOption.NULL) Integer epicId
     ) {
         try {
             shellService.printHeading("Filtering tasks...");
 
             Map<String, Object> filterParams = new HashMap<>();
             if (assigneeId != null) filterParams.put("assignedToId", assigneeId);
-            if (statusId != null) filterParams.put("statusId", Integer.parseInt(statusId));
-            if (priorityId != null) filterParams.put("priorityId", Integer.parseInt(priorityId));
+            if (statusId != null) filterParams.put("statusId", statusId);
+            if (priorityId != null) filterParams.put("priorityId", priorityId);
             if (sprintId != null) filterParams.put("sprintId", sprintId);
             if (epicId != null) filterParams.put("epicId", epicId);
 
@@ -422,6 +422,39 @@ public class TaskShellCommand {
             shellService.printSuccess("Task deleted successfully!");
         } catch (Exception e) {
             shellService.printError("Error deleting task: " + e.getMessage());
+        }
+    }
+
+    @ShellMethod(key = "task-overdue", value = "View your overdue tasks")
+    @ShellMethodAvailability("isUserLoggedIn")
+    public void overdueTasks(){
+        try{
+            shellService.printHeading("Getting Overdue tasks....");
+            Object[] tasks = apiService.get("/tasks/my-tasks", Object[].class);
+
+            if (tasks.length == 0) {
+                shellService.printInfo("You have no overdue tasks");
+            } else {
+                List<String[]> tableData = new ArrayList<>();
+
+                for (Object taskObj : tasks) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> task = (Map<String, Object>) taskObj;
+
+                    String[] row = new String[4];
+                    row[0] = String.valueOf(task.get("id"));
+                    row[1] = String.valueOf(task.get("title"));
+                    row[2] = String.valueOf(task.get("statusName"));
+                    row[3] = String.valueOf(task.get("priorityName"));
+
+                    tableData.add(row);
+                }
+
+                String[] headers = {"ID", "Title", "Status", "Priority"};
+                shellService.printTable(headers, tableData.toArray(new String[0][]));
+            }
+        } catch (Exception e) {
+            shellService.printError("Error getting overdue tasks: " + e.getMessage());
         }
     }
 

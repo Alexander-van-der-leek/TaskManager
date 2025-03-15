@@ -63,54 +63,91 @@ public class APIService {
 
     // Generic method for authenticated GET requests
     public <T> T get(String uri, Class<T> responseType) {
-        return webClient.get()
-                .uri(uri)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + userSession.getToken())
-                .retrieve()
-                .bodyToMono(responseType)
-                .block();
+        try {
+            return webClient.get()
+                    .uri(uri)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + userSession.getToken())
+                    .retrieve()
+                    .bodyToMono(responseType)
+                    .block();
+        } catch (WebClientResponseException ex) {
+            handleApiError(ex);
+            return null;
+        }
     }
 
     // Generic method for authenticated POST requests
     public <T> T post(String uri, Object body, Class<T> responseType) {
-        return webClient.post()
-                .uri(uri)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + userSession.getToken())
-                .bodyValue(body)
-                .retrieve()
-                .bodyToMono(responseType)
-                .block();
+        try{
+            return webClient.post()
+                    .uri(uri)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + userSession.getToken())
+                    .bodyValue(body)
+                    .retrieve()
+                    .bodyToMono(responseType)
+                    .block();
+        } catch (WebClientResponseException ex) {
+            handleApiError(ex);
+            return null;
+        }
     }
 
     // Generic method for authenticated PUT requests
     public <T> T put(String uri, Object body, Class<T> responseType) {
-        return webClient.put()
-                .uri(uri)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + userSession.getToken())
-                .bodyValue(body)
-                .retrieve()
-                .bodyToMono(responseType)
-                .block();
+        try {
+            return webClient.put()
+                    .uri(uri)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + userSession.getToken())
+                    .bodyValue(body)
+                    .retrieve()
+                    .bodyToMono(responseType)
+                    .block();
+        } catch (WebClientResponseException ex) {
+            handleApiError(ex);
+            return null;
+        }
     }
 
     // Generic method for authenticated PATCH requests
     public <T> T patch(String uri, Object body, Class<T> responseType) {
-        return webClient.patch()
-                .uri(uri)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + userSession.getToken())
-                .bodyValue(body != null ? body : new HashMap<>())
-                .retrieve()
-                .bodyToMono(responseType)
-                .block();
+        try {
+            return webClient.patch()
+                    .uri(uri)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + userSession.getToken())
+                    .bodyValue(body != null ? body : new HashMap<>())
+                    .retrieve()
+                    .bodyToMono(responseType)
+                    .block();
+        } catch (WebClientResponseException ex) {
+            handleApiError(ex);
+            return null;
+        }
     }
 
     // Generic method for authenticated DELETE requests
     public <T> T delete(String uri, Class<T> responseType) {
-        return webClient.delete()
-                .uri(uri)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + userSession.getToken())
-                .retrieve()
-                .bodyToMono(responseType)
-                .block();
+        try {
+            return webClient.delete()
+                    .uri(uri)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + userSession.getToken())
+                    .retrieve()
+                    .bodyToMono(responseType)
+                    .block();
+        } catch (WebClientResponseException ex) {
+            handleApiError(ex);
+            return null;
+        }
+    }
+
+    private void handleApiError(WebClientResponseException ex) {
+        try {
+            Map<String, Object> errorResponse = objectMapper.readValue(
+                    ex.getResponseBodyAsString(), new TypeReference<Map<String, Object>>() {});
+            String errorMessage = (String) errorResponse.getOrDefault("message",
+                    "Unknown error: " + ex.getMessage());
+            throw new RuntimeException(errorMessage);
+        } catch (JsonProcessingException jsonException) {
+            throw new RuntimeException("API Error: " + ex.getStatusCode() + " - " + ex.getMessage());
+        }
     }
 }

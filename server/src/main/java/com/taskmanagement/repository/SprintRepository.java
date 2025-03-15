@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 import com.taskmanagement.model.Sprint;
 
 @Repository
-public interface SprintRepository extends JpaRepository<Sprint, UUID> {
+public interface SprintRepository extends JpaRepository<Sprint, Integer> {
     // Query methods will be implemented later
 }
