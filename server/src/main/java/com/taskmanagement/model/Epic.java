@@ -3,7 +3,6 @@ package com.taskmanagement.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.ZonedDateTime;
-import java.util.UUID;
 
 @Entity
 @Table(name = "epics")
@@ -11,7 +10,8 @@ import java.util.UUID;
 public class Epic {
 
    @Id
-   private UUID id;
+   @GeneratedValue(strategy = GenerationType.IDENTITY)
+   private Integer id;
 
    @Column(nullable = false)
    private String name;
@@ -43,7 +43,6 @@ public class Epic {
 
    @PrePersist
    protected void onCreate() {
-      id = UUID.randomUUID();
       createdAt = updatedAt = ZonedDateTime.now();
    }
 
