@@ -425,6 +425,39 @@ public class TaskShellCommand {
         }
     }
 
+    @ShellMethod(key = "task-overdue", value = "View your overdue tasks")
+    @ShellMethodAvailability("isUserLoggedIn")
+    public void overdueTasks(){
+        try{
+            shellService.printHeading("Getting Overdue tasks....");
+            Object[] tasks = apiService.get("/tasks/my-tasks", Object[].class);
+
+            if (tasks.length == 0) {
+                shellService.printInfo("You have no overdue tasks");
+            } else {
+                List<String[]> tableData = new ArrayList<>();
+
+                for (Object taskObj : tasks) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> task = (Map<String, Object>) taskObj;
+
+                    String[] row = new String[4];
+                    row[0] = String.valueOf(task.get("id"));
+                    row[1] = String.valueOf(task.get("title"));
+                    row[2] = String.valueOf(task.get("statusName"));
+                    row[3] = String.valueOf(task.get("priorityName"));
+
+                    tableData.add(row);
+                }
+
+                String[] headers = {"ID", "Title", "Status", "Priority"};
+                shellService.printTable(headers, tableData.toArray(new String[0][]));
+            }
+        } catch (Exception e) {
+            shellService.printError("Error getting overdue tasks: " + e.getMessage());
+        }
+    }
+
     public Availability isUserLoggedIn() {
         return userSession.isAuthenticated()
                 ? Availability.available()

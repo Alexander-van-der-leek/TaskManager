@@ -45,14 +45,12 @@ public class TaskDTO {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private ZonedDateTime completedAt;
 
-    // Additional fields for display purposes
     private String assignedToName;
     private String statusName;
     private String priorityName;
     private String epicName;
     private String sprintName;
 
-    // Getters and setters
 
     public Integer getId() {
         return id;
