@@ -19,7 +19,7 @@ public class TaskCustomRepository {
     @PersistenceContext
     private EntityManager entityManager;
 
-    public List<Task> findTasksByFilters(UUID assignedToId, Integer statusId, Integer priorityId, UUID sprintId, UUID epicId) {
+    public List<Task> findTasksByFilters(UUID assignedToId, Integer statusId, Integer priorityId, Integer sprintId, Integer epicId) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Task> query = cb.createQuery(Task.class);
         Root<Task> task = query.from(Task.class);

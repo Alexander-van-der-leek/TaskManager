@@ -9,13 +9,13 @@ public class TaskFilterDTO {
     private UUID assignedToId;
     private Integer statusId;
     private Integer priorityId;
-    private UUID sprintId;
-    private UUID epicId;
+    private Integer sprintId;
+    private Integer epicId;
 
     public TaskFilterDTO() {
     }
 
-    public TaskFilterDTO(UUID assignedToId, Integer statusId, Integer priorityId, UUID sprintId, UUID epicId) {
+    public TaskFilterDTO(UUID assignedToId, Integer statusId, Integer priorityId, Integer sprintId, Integer epicId) {
         this.assignedToId = assignedToId;
         this.statusId = statusId;
         this.priorityId = priorityId;

@@ -14,10 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -53,8 +50,8 @@ public class TaskServiceTest {
 
     private UUID userId;
     private UUID assigneeId;
-    private UUID epicId;
-    private UUID sprintId;
+    private Integer epicId;
+    private Integer sprintId;
     private Integer taskId;
     private Integer statusId;
     private Integer priorityId;
@@ -72,10 +69,13 @@ public class TaskServiceTest {
 
     @BeforeEach
     void setUp() {
+
+        Random rand = new Random();
+
         userId = UUID.randomUUID();
         assigneeId = UUID.randomUUID();
-        epicId = UUID.randomUUID();
-        sprintId = UUID.randomUUID();
+        epicId = rand.nextInt();
+        sprintId = rand.nextInt();
         taskId = 1;
         statusId = 1;
         priorityId = 1;

@@ -20,7 +20,7 @@ CREATE TABLE users (
 );
 
 CREATE TABLE epics (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
     owner_id UUID NOT NULL REFERENCES users(id),
@@ -33,7 +33,7 @@ CREATE TABLE epics (
 );
 
 CREATE TABLE sprints (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     goal TEXT NOT NULL,
     scrum_master_id UUID NOT NULL REFERENCES users(id),
@@ -59,8 +59,8 @@ CREATE TABLE task_priorities (
 
 CREATE TABLE tasks (
     id SERIAL PRIMARY KEY,
-    epic_id UUID REFERENCES epics(id),
-    sprint_id UUID REFERENCES sprints(id),
+    epic_id INT REFERENCES epics(id),
+    sprint_id INT REFERENCES sprints(id),
     created_by_id UUID NOT NULL REFERENCES users(id),
     assigned_to_id UUID NOT NULL REFERENCES users(id),
     priority_id INT NOT NULL REFERENCES task_priorities(id),
@@ -76,7 +76,7 @@ CREATE TABLE tasks (
 );
 
 CREATE TABLE task_comments (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id SERIAL PRIMARY KEY,
     task_id INT NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES users(id),
     content TEXT NOT NULL,

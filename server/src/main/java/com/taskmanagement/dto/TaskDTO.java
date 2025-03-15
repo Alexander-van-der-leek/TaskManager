@@ -13,9 +13,9 @@ import java.util.UUID;
 public class TaskDTO {
     private Integer id;
 
-    private UUID epicId;
+    private Integer epicId;
 
-    private UUID sprintId;
+    private Integer sprintId;
 
     private UUID createdById;
 

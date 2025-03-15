@@ -62,7 +62,7 @@ public class TaskController {
 
     @GetMapping("/epic/{epicId}")
     public ResponseEntity<List<TaskDTO>> getTasksByEpic(
-            @PathVariable UUID epicId,
+            @PathVariable Integer epicId,
             @AuthenticationPrincipal UserDetails userDetails) {
         UUID userId = UUID.fromString(userDetails.getUsername());
         logger.info("User {} requesting tasks for epic {}", userId, epicId);
@@ -71,7 +71,7 @@ public class TaskController {
 
     @GetMapping("/sprint/{sprintId}")
     public ResponseEntity<List<TaskDTO>> getTasksBySprint(
-            @PathVariable UUID sprintId,
+            @PathVariable Integer sprintId,
             @AuthenticationPrincipal UserDetails userDetails) {
         UUID userId = UUID.fromString(userDetails.getUsername());
         logger.info("User {} requesting tasks for sprint {}", userId, sprintId);
@@ -80,7 +80,7 @@ public class TaskController {
 
     @GetMapping("/sprint/{sprintId}/stats")
     public ResponseEntity<Map<String, Long>> getSprintStats(
-            @PathVariable UUID sprintId,
+            @PathVariable Integer sprintId,
             @AuthenticationPrincipal UserDetails userDetails) {
         UUID userId = UUID.fromString(userDetails.getUsername());
         logger.info("User {} requesting stats for sprint {}", userId, sprintId);
@@ -156,7 +156,7 @@ public class TaskController {
     @PreAuthorize("hasRole('SCRUM_MASTER') or hasRole('ADMIN') or hasRole('PRODUCT_OWNER')")
     public ResponseEntity<TaskDTO> addTaskToSprint(
             @PathVariable Integer id,
-            @PathVariable UUID sprintId,
+            @PathVariable Integer sprintId,
             @AuthenticationPrincipal UserDetails userDetails) {
         UUID userId = UUID.fromString(userDetails.getUsername());
         logger.info("User {} adding task {} to sprint {}", userId, id, sprintId);
@@ -177,7 +177,7 @@ public class TaskController {
     @PreAuthorize("hasRole('PRODUCT_OWNER') or hasRole('ADMIN')")
     public ResponseEntity<TaskDTO> addTaskToEpic(
             @PathVariable Integer id,
-            @PathVariable UUID epicId,
+            @PathVariable Integer epicId,
             @AuthenticationPrincipal UserDetails userDetails) {
         UUID userId = UUID.fromString(userDetails.getUsername());
         logger.info("User {} adding task {} to epic {}", userId, id, epicId);

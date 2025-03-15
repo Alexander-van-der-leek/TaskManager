@@ -57,6 +57,8 @@ public class TaskControllerTest {
     private List<TaskDTO> taskDTOList;
     private User userDetails;
 
+    private Random rand = new Random();
+
     @Autowired
     private WebApplicationContext context;
 
@@ -114,7 +116,7 @@ public class TaskControllerTest {
     @Test
     @WithMockUser(username = "550e8400-e29b-41d4-a716-446655440000", roles = {"ADMIN"})
     void getTasksByEpic_ShouldReturnEpicTasks() throws Exception {
-        UUID epicId = UUID.randomUUID();
+        Integer epicId = rand.nextInt();
         when(taskService.getTasksByEpic(epicId, userId)).thenReturn(taskDTOList);
 
         mockMvc.perform(get("/api/tasks/epic/" + epicId)
@@ -128,8 +130,7 @@ public class TaskControllerTest {
     @Test
     @WithMockUser(username = "550e8400-e29b-41d4-a716-446655440000", roles = {"ADMIN"})
     void getTasksBySprint_ShouldReturnSprintTasks() throws Exception {
-
-        UUID sprintId = UUID.randomUUID();
+        Integer sprintId = rand.nextInt();
         when(taskService.getTasksBySprint(sprintId, userId)).thenReturn(taskDTOList);
 
         mockMvc.perform(get("/api/tasks/sprint/" + sprintId)
@@ -144,7 +145,7 @@ public class TaskControllerTest {
     @WithMockUser(username = "550e8400-e29b-41d4-a716-446655440000", roles = {"ADMIN"})
     void getSprintStats_ShouldReturnSprintStats() throws Exception {
 
-        UUID sprintId = UUID.randomUUID();
+        Integer sprintId = rand.nextInt();
         Map<String, Long> stats = new HashMap<>();
         stats.put("TODO", 5L);
         stats.put("IN_PROGRESS", 3L);
@@ -233,7 +234,7 @@ public class TaskControllerTest {
     @WithMockUser(username = "550e8400-e29b-41d4-a716-446655440000", roles = {"ADMIN"})
     void addTaskToSprint_ShouldAddTaskToSprint_WhenSprintExists() throws Exception {
 
-        UUID sprintId = UUID.randomUUID();
+        Integer sprintId = rand.nextInt();
         TaskDTO updatedTask = new TaskDTO();
         updatedTask.setId(1);
         updatedTask.setTitle("Test Task");
@@ -247,7 +248,7 @@ public class TaskControllerTest {
                         .with(SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(1)))
-                .andExpect(jsonPath("$.sprintId", is(sprintId.toString())));
+                .andExpect(jsonPath("$.sprintId", is(sprintId)));
     }
 
     @Test
@@ -273,7 +274,7 @@ public class TaskControllerTest {
     @WithMockUser(username = "550e8400-e29b-41d4-a716-446655440000", roles = {"ADMIN"})
     void addTaskToEpic_ShouldAddTaskToEpic_WhenEpicExists() throws Exception {
 
-        UUID epicId = UUID.randomUUID();
+        Integer epicId = rand.nextInt();
         TaskDTO updatedTask = new TaskDTO();
         updatedTask.setId(1);
         updatedTask.setTitle("Test Task");
@@ -287,7 +288,7 @@ public class TaskControllerTest {
                         .with(SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(1)))
-                .andExpect(jsonPath("$.epicId", is(epicId.toString())));
+                .andExpect(jsonPath("$.epicId", is(epicId)));
     }
 
     @Test
