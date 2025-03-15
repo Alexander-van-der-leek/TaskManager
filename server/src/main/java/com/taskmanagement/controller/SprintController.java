@@ -25,7 +25,7 @@ public class SprintController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<SprintDTO> getSprintById(@PathVariable UUID id) {
+    public ResponseEntity<SprintDTO> getSprintById(@PathVariable Integer id) {
         SprintDTO sprint = sprintService.getSprintById(id);
         return ResponseEntity.ok(sprint);
     }
@@ -37,13 +37,13 @@ public class SprintController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<SprintDTO> updateSprint(@PathVariable UUID id, @RequestBody SprintDTO sprintDTO) {
+    public ResponseEntity<SprintDTO> updateSprint(@PathVariable Integer id, @RequestBody SprintDTO sprintDTO) {
         SprintDTO updatedSprint = sprintService.updateSprint(id, sprintDTO);
         return ResponseEntity.ok(updatedSprint);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteSprint(@PathVariable UUID id) {
+    public ResponseEntity<Void> deleteSprint(@PathVariable Integer id) {
         sprintService.deleteSprint(id);
         return ResponseEntity.noContent().build();
     }

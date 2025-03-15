@@ -10,7 +10,8 @@ import java.util.UUID;
 @Table(name = "sprints")
 public class Sprint {
     @Id
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
 
     @Column(nullable = false)
     private String name;
@@ -42,7 +43,6 @@ public class Sprint {
 
     @PrePersist
     protected void onCreate() {
-        id = UUID.randomUUID();
         createdAt = updatedAt = ZonedDateTime.now();
     }
 

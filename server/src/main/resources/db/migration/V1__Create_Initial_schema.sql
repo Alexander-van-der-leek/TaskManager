@@ -2,7 +2,7 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE roles (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
     description TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
@@ -11,7 +11,7 @@ CREATE TABLE roles (
 
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    role_id UUID NOT NULL REFERENCES roles(id),
+    role_id INT NOT NULL REFERENCES roles(id),
     email VARCHAR(255) NOT NULL UNIQUE,
     name VARCHAR(255) NOT NULL,
     google_id VARCHAR(255) NOT NULL UNIQUE,
@@ -20,7 +20,7 @@ CREATE TABLE users (
 );
 
 CREATE TABLE epics (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
     owner_id UUID NOT NULL REFERENCES users(id),
@@ -33,7 +33,7 @@ CREATE TABLE epics (
 );
 
 CREATE TABLE sprints (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     goal TEXT NOT NULL,
     scrum_master_id UUID NOT NULL REFERENCES users(id),
@@ -46,27 +46,27 @@ CREATE TABLE sprints (
 );
 
 CREATE TABLE task_statuses (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
     display_order INT NOT NULL
 );
 
 CREATE TABLE task_priorities (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
     value INT NOT NULL
 );
 
 CREATE TABLE tasks (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    epic_id UUID REFERENCES epics(id),
-    sprint_id UUID REFERENCES sprints(id),
+    id SERIAL PRIMARY KEY,
+    epic_id INT REFERENCES epics(id),
+    sprint_id INT REFERENCES sprints(id),
     created_by_id UUID NOT NULL REFERENCES users(id),
     assigned_to_id UUID NOT NULL REFERENCES users(id),
-    priority_id UUID NOT NULL REFERENCES task_priorities(id),
+    priority_id INT NOT NULL REFERENCES task_priorities(id),
     title VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
-    status_id UUID NOT NULL REFERENCES task_statuses(id),
+    status_id INT NOT NULL REFERENCES task_statuses(id),
     story_points INT NOT NULL,
     estimated_hours INT NOT NULL,
     due_date TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -76,8 +76,8 @@ CREATE TABLE tasks (
 );
 
 CREATE TABLE task_comments (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    task_id UUID NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+    id SERIAL PRIMARY KEY,
+    task_id INT NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES users(id),
     content TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),

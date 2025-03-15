@@ -19,7 +19,7 @@ public class Epic {
    @Column(nullable = false)
    private String description;
 
-   @ManyToOne(fetch = FetchType.LAZY)
+   @ManyToOne(fetch = FetchType.EAGER)
    @JoinColumn(name = "owner_id", nullable = false)
    private User owner;
 

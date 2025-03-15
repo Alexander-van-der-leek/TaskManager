@@ -1,14 +1,18 @@
 package com.taskmanagement.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
+
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
+@Data
 @Entity
 @Table(name = "task_statuses")
 public class TaskStatus {
     @Id
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
     @Column(nullable = false, unique = true)
     private String name;
@@ -17,30 +21,5 @@ public class TaskStatus {
     @Column(name = "display_order", nullable = false)
     private int displayOrder;
 
-    // Getters and Setters
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public int getDisplayOrder() {
-        return displayOrder;
-    }
-
-    public void setDisplayOrder(int displayOrder) {
-        this.displayOrder = displayOrder;
-    }
 
 }

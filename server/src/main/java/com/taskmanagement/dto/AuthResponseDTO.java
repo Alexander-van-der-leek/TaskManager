@@ -1,7 +1,10 @@
 package com.taskmanagement.dto;
 
+import lombok.Data;
+
 import java.util.UUID;
 
+@Data
 public class AuthResponseDTO {
     private String token;
     private UUID userId;
@@ -18,35 +21,4 @@ public class AuthResponseDTO {
         this.email = email;
     }
 
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public UUID getUserId() {
-        return userId;
-    }
-
-    public void setUserId(UUID userId) {
-        this.userId = userId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
 }
