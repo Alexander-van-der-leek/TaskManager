@@ -17,22 +17,6 @@ public class EpicSprintShellCommands {
     @Autowired
     private ShellService shellService;
 
-    /* Epic commands */
-
-    @ShellMethod(key = "epic-list", value = "List all epics")
-    @ShellMethodAvailability("isUserLoggedIn")
-    public void listEpics() {
-        shellService.printInfo("Feature coming soon: List of epics will be displayed here.");
-        shellService.printInfo("This feature is not yet implemented.");
-    }
-
-    @ShellMethod(key = "epic-create", value = "Create a new epic")
-    @ShellMethodAvailability("isUserLoggedIn")
-    public void createEpic() {
-        shellService.printInfo("Feature coming soon: Create epic functionality will be added here.");
-        shellService.printInfo("This feature is not yet implemented.");
-    }
-
     /* Sprint commands */
 
     @ShellMethod(key = "sprint-list", value = "List all sprints")
