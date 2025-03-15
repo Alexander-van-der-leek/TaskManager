@@ -141,10 +141,27 @@ public class EpicShellCommand {
     @ShellMethodAvailability("isUserLoggedIn")
     public void deleteEpic(@ShellOption(help = "Epic ID") String epicId) {
         try {
-            shellService.printHeading("Deleting epic...");
+            shellService.printHeading("Reassigning tasks before deleting epic...");
 
-            apiService.delete("/epics/" + epicId, Object.class);
+            Object[] tasks = apiService.get("/tasks?epicId=" + epicId, Object[].class);
+            if (tasks.length > 0) {
+                for (Object taskObj : tasks) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> task = (Map<String, Object>) taskObj;
+
+                    Map<String, Object> updates = new HashMap<>();
+                    updates.put("epicId", null);
+                    apiService.put("/tasks/" + task.get("id"), updates, Void.class);
+                }
+                shellService.printInfo("All associated tasks have been unlinked from the epic.");
+            } else {
+                shellService.printInfo("No tasks linked to this epic.");
+            }
+
+            shellService.printHeading("Deleting epic...");
+            apiService.delete("/epics/" + epicId, Void.class);
             shellService.printSuccess("Epic deleted successfully!");
+
         } catch (Exception e) {
             shellService.printError("Error deleting epic: " + e.getMessage());
         }

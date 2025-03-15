@@ -525,6 +525,15 @@ public class TaskService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    public void unlinkTasksFromEpic(Integer epicId) {
+        List<Task> tasks = taskRepository.findByEpicId(epicId);
+        for (Task task : tasks) {
+            task.setEpic(null);  // Unlink task from epic
+        }
+        taskRepository.saveAll(tasks);  // Batch update
+    }
+
     private TaskDTO convertToDTO(Task task) {
         TaskDTO dto = new TaskDTO();
         dto.setId(task.getId());

@@ -9,6 +9,7 @@ import com.taskmanagement.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -18,11 +19,13 @@ import java.util.Optional;
 public class EpicService {
     private final EpicRepository epicRepository;
     private final UserRepository userRepository;
+    private final TaskService taskService;
     private static final Logger logger = LoggerFactory.getLogger(EpicService.class);
 
-    public EpicService(EpicRepository epicRepository, UserRepository userRepository) {
+    public EpicService(EpicRepository epicRepository, UserRepository userRepository, TaskService taskService) {
         this.epicRepository = epicRepository;
         this.userRepository = userRepository;
+        this.taskService = taskService;
     }
 
     public Epic createEpic(EpicDTO epicDTO) {
@@ -67,8 +70,10 @@ public class EpicService {
         }).orElseThrow(() -> new EpicNotFoundException("Epic not found with id: " + id));
     }
 
+    @Transactional
     public void deleteEpic(int id) {
         epicRepository.findById(id).orElseThrow(() -> new EpicNotFoundException("Epic not found with id: " + id));
+        taskService.unlinkTasksFromEpic(id);
         epicRepository.deleteById(id);
 
         logger.info("Deleted epic with id: {}", id);
