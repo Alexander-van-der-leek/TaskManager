@@ -2,14 +2,13 @@ package com.taskmanagement.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-
 import java.time.ZonedDateTime;
-import java.util.UUID;
 
-@Data
 @Entity
 @Table(name = "epics")
+@Data
 public class Epic {
+
    @Id
    @GeneratedValue(strategy = GenerationType.IDENTITY)
    private int id;
@@ -25,7 +24,7 @@ public class Epic {
    private User owner;
 
    @Column(name = "story_points", nullable = false)
-   private int storyPoints;
+   private Integer storyPoints;
 
    @Column(name = "start_date", nullable = false)
    private ZonedDateTime startDate;
