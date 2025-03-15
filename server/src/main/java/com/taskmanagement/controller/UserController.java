@@ -25,7 +25,6 @@ public class UserController {
         this.userService = userService;
     }
 
-    // Get all users
     @GetMapping
     public ResponseEntity<List<UserDTO>> getAllUsers(@AuthenticationPrincipal UserDetails userDetails) {
         UUID userId = UUID.fromString(userDetails.getUsername());
@@ -33,7 +32,6 @@ public class UserController {
         return ResponseEntity.ok(userService.getAllUsers(userId));
     }
 
-    // Get a user by their ID
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserById(
             @PathVariable UUID id,
@@ -43,7 +41,6 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserById(id, userId));
     }
 
-    // Create a new user
     @PostMapping
     public ResponseEntity<UserDTO> createUser(
             @Valid @RequestBody UserDTO userDTO,
@@ -53,7 +50,6 @@ public class UserController {
         return ResponseEntity.ok(userService.createUser(userDTO, userId));
     }
 
-    // Update an existing user
     @PutMapping("/{id}")
     public ResponseEntity<UserDTO> updateUser(
             @PathVariable UUID id,
@@ -65,14 +61,13 @@ public class UserController {
         return ResponseEntity.ok(userService.updateUser(userDTO, userId));
     }
 
-    // Delete a user
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(
+    public ResponseEntity<Void> deactivateUser(
             @PathVariable UUID id,
             @AuthenticationPrincipal UserDetails userDetails) {
         UUID userId = UUID.fromString(userDetails.getUsername());
-        logger.info("User {} deleting user {}", userId, id);
-        userService.deleteUser(id, userId);
+        logger.info("User {} deactivating user {}", userId, id);
+        userService.deactivateUser(id, userId);
         return ResponseEntity.noContent().build();
     }
 }

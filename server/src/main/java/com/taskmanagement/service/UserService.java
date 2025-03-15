@@ -21,7 +21,6 @@ public class UserService {
         this.roleRepository = roleRepository;
     }
 
-
     public List<UserDTO> getAllUsers(UUID userId) {
         return userRepository.findAll()
                 .stream()
@@ -29,36 +28,33 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-
     public UserDTO getUserById(UUID id, UUID userId) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         return convertToDTO(user);
     }
 
-    // Create a new user
+
     public UserDTO createUser(UserDTO userDTO, UUID userId) {
-        // Ensure role exists before saving the user
+
         Role role = roleRepository.findById(userDTO.getRole().getId())
                 .orElseThrow(() -> new RuntimeException("Role not found"));
 
         User user = new User();
-        user.setId(UUID.randomUUID());  // Setting a new UUID
+        user.setId(UUID.randomUUID());
         user.setRole(role);
         user.setEmail(userDTO.getEmail());
         user.setName(userDTO.getName());
         user.setGoogleId(userDTO.getGoogleId());
-
+        user.setIsActive(true);
         User savedUser = userRepository.save(user);
         return convertToDTO(savedUser);
     }
 
-    // Update an existing user
     public UserDTO updateUser(UserDTO userDTO, UUID userId) {
         User user = userRepository.findById(userDTO.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Update user fields based on userDTO
         if (userDTO.getRole() != null) {
             Role role = roleRepository.findById(userDTO.getRole().getId())
                     .orElseThrow(() -> new RuntimeException("Role not found"));
@@ -73,12 +69,16 @@ public class UserService {
         return convertToDTO(updatedUser);
     }
 
-    // Delete a user
-    public void deleteUser(UUID id, UUID userId) {
-        userRepository.deleteById(id);
+
+    public void deactivateUser(UUID id, UUID userId) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setIsActive(false);
+
+        userRepository.save(user);
     }
 
-    // Convert User entity to UserDTO
+
     private UserDTO convertToDTO(User user) {
         return new UserDTO(
                 user.getId(),
@@ -89,18 +89,5 @@ public class UserService {
                 user.getCreatedAt(),
                 user.getUpdatedAt()
         );
-    }
-
-    // Convert UserDTO to User entity
-    private User convertToEntity(UserDTO userDTO) {
-        User user = new User();
-        user.setId(userDTO.getId());
-        user.setRole(userDTO.getRole());
-        user.setEmail(userDTO.getEmail());
-        user.setName(userDTO.getName());
-        user.setGoogleId(userDTO.getGoogleId());
-        user.setCreatedAt(userDTO.getCreatedAt());
-        user.setUpdatedAt(userDTO.getUpdatedAt());
-        return user;
     }
 }
