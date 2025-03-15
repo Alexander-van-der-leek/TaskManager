@@ -1,6 +1,7 @@
 package com.taskmanagement.controller;
 
 import com.taskmanagement.dto.TaskDTO;
+import com.taskmanagement.dto.TaskFilterDTO;
 import com.taskmanagement.service.TaskService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -33,9 +35,77 @@ public class TaskController {
         return ResponseEntity.ok(taskService.getAllTasks(userId));
     }
 
+    @PostMapping("/filter")
+    public ResponseEntity<List<TaskDTO>> getTasksByFilter(
+            @RequestBody TaskFilterDTO filterDTO,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        UUID userId = UUID.fromString(userDetails.getUsername());
+        logger.info("User {} filtering tasks", userId);
+        return ResponseEntity.ok(taskService.getTasksByFilter(filterDTO, userId));
+    }
+
+    @GetMapping("/assignee/{assigneeId}")
+    public ResponseEntity<List<TaskDTO>> getTasksByAssignee(
+            @PathVariable UUID assigneeId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        UUID userId = UUID.fromString(userDetails.getUsername());
+        logger.info("User {} requesting tasks for assignee {}", userId, assigneeId);
+        return ResponseEntity.ok(taskService.getTasksByAssignee(assigneeId, userId));
+    }
+
+    @GetMapping("/my-tasks")
+    public ResponseEntity<List<TaskDTO>> getMyActiveTasks(@AuthenticationPrincipal UserDetails userDetails) {
+        UUID userId = UUID.fromString(userDetails.getUsername());
+        logger.info("User {} requesting their active tasks", userId);
+        return ResponseEntity.ok(taskService.getUserActiveTasks(userId));
+    }
+
+    @GetMapping("/epic/{epicId}")
+    public ResponseEntity<List<TaskDTO>> getTasksByEpic(
+            @PathVariable Integer epicId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        UUID userId = UUID.fromString(userDetails.getUsername());
+        logger.info("User {} requesting tasks for epic {}", userId, epicId);
+        return ResponseEntity.ok(taskService.getTasksByEpic(epicId, userId));
+    }
+
+    @GetMapping("/sprint/{sprintId}")
+    public ResponseEntity<List<TaskDTO>> getTasksBySprint(
+            @PathVariable Integer sprintId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        UUID userId = UUID.fromString(userDetails.getUsername());
+        logger.info("User {} requesting tasks for sprint {}", userId, sprintId);
+        return ResponseEntity.ok(taskService.getTasksBySprint(sprintId, userId));
+    }
+
+    @GetMapping("/sprint/{sprintId}/stats")
+    public ResponseEntity<Map<String, Long>> getSprintStats(
+            @PathVariable Integer sprintId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        UUID userId = UUID.fromString(userDetails.getUsername());
+        logger.info("User {} requesting stats for sprint {}", userId, sprintId);
+        return ResponseEntity.ok(taskService.getSprintStats(sprintId, userId));
+    }
+
+    @GetMapping("/overdue")
+    public ResponseEntity<List<TaskDTO>> getOverdueTasks(@AuthenticationPrincipal UserDetails userDetails) {
+        UUID userId = UUID.fromString(userDetails.getUsername());
+        logger.info("User {} requesting overdue tasks", userId);
+        return ResponseEntity.ok(taskService.getOverdueTasks(userId));
+    }
+
+    @GetMapping("/recent")
+    public ResponseEntity<List<TaskDTO>> getRecentlyUpdatedTasks(
+            @RequestParam(defaultValue = "24") int hours,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        UUID userId = UUID.fromString(userDetails.getUsername());
+        logger.info("User {} requesting tasks updated in the last {} hours", userId, hours);
+        return ResponseEntity.ok(taskService.getRecentlyUpdatedTasks(userId, hours));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<TaskDTO> getTaskById(
-            @PathVariable UUID id,
+            @PathVariable Integer id,
             @AuthenticationPrincipal UserDetails userDetails) {
         UUID userId = UUID.fromString(userDetails.getUsername());
         logger.info("User {} requesting task {}", userId, id);
@@ -53,7 +123,7 @@ public class TaskController {
 
     @PutMapping("/{id}")
     public ResponseEntity<TaskDTO> updateTask(
-            @PathVariable UUID id,
+            @PathVariable Integer id,
             @Valid @RequestBody TaskDTO taskDTO,
             @AuthenticationPrincipal UserDetails userDetails) {
         UUID userId = UUID.fromString(userDetails.getUsername());
@@ -62,10 +132,71 @@ public class TaskController {
         return ResponseEntity.ok(taskService.updateTask(taskDTO, userId));
     }
 
+    @PatchMapping("/{id}/status/{statusId}")
+    public ResponseEntity<TaskDTO> changeTaskStatus(
+            @PathVariable Integer id,
+            @PathVariable Integer statusId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        UUID userId = UUID.fromString(userDetails.getUsername());
+        logger.info("User {} changing status of task {} to status {}", userId, id, statusId);
+        return ResponseEntity.ok(taskService.changeTaskStatus(id, statusId, userId));
+    }
+
+    @PatchMapping("/{id}/assign/{assigneeId}")
+    public ResponseEntity<TaskDTO> assignTask(
+            @PathVariable Integer id,
+            @PathVariable UUID assigneeId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        UUID userId = UUID.fromString(userDetails.getUsername());
+        logger.info("User {} assigning task {} to user {}", userId, id, assigneeId);
+        return ResponseEntity.ok(taskService.assignTask(id, assigneeId, userId));
+    }
+
+    @PatchMapping("/{id}/add-to-sprint/{sprintId}")
+    @PreAuthorize("hasRole('SCRUM_MASTER') or hasRole('ADMIN') or hasRole('PRODUCT_OWNER')")
+    public ResponseEntity<TaskDTO> addTaskToSprint(
+            @PathVariable Integer id,
+            @PathVariable Integer sprintId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        UUID userId = UUID.fromString(userDetails.getUsername());
+        logger.info("User {} adding task {} to sprint {}", userId, id, sprintId);
+        return ResponseEntity.ok(taskService.addTaskToSprint(id, sprintId, userId));
+    }
+
+    @PatchMapping("/{id}/remove-from-sprint")
+    @PreAuthorize("hasRole('SCRUM_MASTER') or hasRole('ADMIN') or hasRole('PRODUCT_OWNER')")
+    public ResponseEntity<TaskDTO> removeTaskFromSprint(
+            @PathVariable Integer id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        UUID userId = UUID.fromString(userDetails.getUsername());
+        logger.info("User {} removing task {} from sprint", userId, id);
+        return ResponseEntity.ok(taskService.removeTaskFromSprint(id, userId));
+    }
+
+    @PatchMapping("/{id}/add-to-epic/{epicId}")
+    @PreAuthorize("hasRole('PRODUCT_OWNER') or hasRole('ADMIN')")
+    public ResponseEntity<TaskDTO> addTaskToEpic(
+            @PathVariable Integer id,
+            @PathVariable Integer epicId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        UUID userId = UUID.fromString(userDetails.getUsername());
+        logger.info("User {} adding task {} to epic {}", userId, id, epicId);
+        return ResponseEntity.ok(taskService.addTaskToEpic(id, epicId, userId));
+    }
+
+    @PatchMapping("/{id}/remove-from-epic")
+    @PreAuthorize("hasRole('PRODUCT_OWNER') or hasRole('ADMIN')")
+    public ResponseEntity<TaskDTO> removeTaskFromEpic(
+            @PathVariable Integer id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        UUID userId = UUID.fromString(userDetails.getUsername());
+        logger.info("User {} removing task {} from epic", userId, id);
+        return ResponseEntity.ok(taskService.removeTaskFromEpic(id, userId));
+    }
+
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('SCRUM_MASTER') or hasRole('ADMIN') or @taskSecurityService.canDeleteTask(#id, authentication)")
     public ResponseEntity<Void> deleteTask(
-            @PathVariable UUID id,
+            @PathVariable Integer id,
             @AuthenticationPrincipal UserDetails userDetails) {
         UUID userId = UUID.fromString(userDetails.getUsername());
         logger.info("User {} deleting task {}", userId, id);

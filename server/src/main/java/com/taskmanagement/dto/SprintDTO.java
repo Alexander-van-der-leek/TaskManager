@@ -1,10 +1,12 @@
 package com.taskmanagement.dto;
 
+import lombok.Data;
+
 import java.time.ZonedDateTime;
 import java.util.UUID;
-
+@Data
 public class SprintDTO {
-    private UUID id;
+    private int id;
     private String name;
     private String goal;
     private UUID scrumMasterId;
