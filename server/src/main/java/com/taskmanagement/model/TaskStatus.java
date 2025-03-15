@@ -1,9 +1,12 @@
 package com.taskmanagement.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
+
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
+@Data
 @Entity
 @Table(name = "task_statuses")
 public class TaskStatus {
@@ -18,30 +21,5 @@ public class TaskStatus {
     @Column(name = "display_order", nullable = false)
     private int displayOrder;
 
-    // Getters and Setters
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public int getDisplayOrder() {
-        return displayOrder;
-    }
-
-    public void setDisplayOrder(int displayOrder) {
-        this.displayOrder = displayOrder;
-    }
 
 }
