@@ -48,11 +48,11 @@ public class EpicService {
         return epicRepository.findAll();
     }
 
-    public Optional<Epic> getEpicById(Integer id) {
+    public Optional<Epic> getEpicById(int id) {
         return epicRepository.findById(id);
     }
 
-    public Epic updateEpic(Integer id, EpicDTO epicDTO) {
+    public Epic updateEpic(int id, EpicDTO epicDTO) {
         return epicRepository.findById(id).map(epic -> {
             epic.setName(epicDTO.getName());
             epic.setDescription(epicDTO.getDescription());
@@ -67,7 +67,7 @@ public class EpicService {
         }).orElseThrow(() -> new EpicNotFoundException("Epic not found with id: " + id));
     }
 
-    public void deleteEpic(Integer id) {
+    public void deleteEpic(int id) {
         epicRepository.findById(id).orElseThrow(() -> new EpicNotFoundException("Epic not found with id: " + id));
         epicRepository.deleteById(id);
 

@@ -11,7 +11,7 @@ public class Epic {
 
    @Id
    @GeneratedValue(strategy = GenerationType.IDENTITY)
-   private Integer id;
+   private int id;
 
    @Column(nullable = false)
    private String name;
