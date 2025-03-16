@@ -277,7 +277,6 @@ public class TaskService {
             existingTask.setSprint(null);
         }
 
-        // Check if task is being marked as completed
         if (status.getName().equals("DONE") && existingTask.getCompletedAt() == null) {
             existingTask.setCompletedAt(ZonedDateTime.now());
             logger.info("Task {} marked as completed", existingTask.getId());

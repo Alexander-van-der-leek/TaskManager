@@ -74,7 +74,6 @@ public class EpicShellCommand {
         try {
             shellService.printHeading("Creating new epic...");
 
-            // Search for the user by name
             Object[] users = apiService.get("/users/search?name=" + ownerName, Object[].class);
 
             if (users.length == 0) {
@@ -84,29 +83,25 @@ public class EpicShellCommand {
 
             if (users.length > 1) {
                 shellService.printWarning("Multiple users found with that name. Please be more specific:");
-                //displayUsersTable(users);  // You can implement this method to display the list of users
+                //displayUsersTable(users);
                 return;
             }
 
-            // Get the user from the search result
             @SuppressWarnings("unchecked")
             Map<String, Object> user = (Map<String, Object>) users[0];
-            String ownerId = String.valueOf(user.get("id"));  // Assuming the user object contains "id"
+            String ownerId = String.valueOf(user.get("id"));
 
-            // Create the epic object
             Map<String, Object> epic = new HashMap<>();
             epic.put("name", name);
             epic.put("description", description);
-            epic.put("ownerId", ownerId);  // Use the found user ID
+            epic.put("ownerId", ownerId);
             epic.put("storyPoints", storyPoints);
             epic.put("startDate", parseDate(startDate));
             epic.put("targetEndDate", parseDate(targetEndDate));
 
-            // Send the epic creation request
             Object createdEpic = apiService.post("/epics", epic, Object.class);
             shellService.printSuccess("Epic created successfully!");
 
-            // Display the created epic's information
             @SuppressWarnings("unchecked")
             Map<String, Object> epicResult = (Map<String, Object>) createdEpic;
             shellService.printInfo("ID: " + epicResult.get("id"));
@@ -175,27 +170,22 @@ public class EpicShellCommand {
         try {
             shellService.printHeading("Updating epic...");
 
-            // Fetch the current epic data from the database
             Object currentEpicObj = apiService.get("/epics/" + epicId, Object.class);
             @SuppressWarnings("unchecked")
             Map<String, Object> currentEpic = (Map<String, Object>) currentEpicObj;
 
-            // Prepare a map for the updated epic, keeping the existing values
             Map<String, Object> updatedEpic = new HashMap<>(currentEpic);
 
-            // Update fields only if they are provided (i.e., not null)
             if (description != null) updatedEpic.put("description", description);
             if (storyPoints != null) updatedEpic.put("storyPoints", storyPoints);
             if (startDate != null) updatedEpic.put("startDate", DateUtils.parseDate(startDate));
             if (targetEndDate != null) updatedEpic.put("targetEndDate", DateUtils.parseDate(targetEndDate));
             if (actualEndDate != null) updatedEpic.put("actualEndDate", DateUtils.parseDate(actualEndDate));
 
-            // Only update the name if it's provided
             if (name != null) {
                 updatedEpic.put("name", name);
             }
 
-            // Send the updated epic data to the API
             apiService.put("/epics/" + epicId, updatedEpic, Object.class);
             shellService.printSuccess("Epic updated successfully!");
 
