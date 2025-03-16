@@ -3,6 +3,7 @@ package com.taskmanagement.cli.command;
 import com.taskmanagement.cli.config.UserSession;
 import com.taskmanagement.cli.service.APIService;
 import com.taskmanagement.cli.service.ShellService;
+import com.taskmanagement.cli.util.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.Availability;
 import org.springframework.shell.standard.ShellComponent;
@@ -47,12 +48,12 @@ public class EpicShellCommand {
                     String[] row = new String[3];
                     row[0] = String.valueOf(epic.get("id"));
                     row[1] = String.valueOf(epic.get("name"));
-                    row[2] = String.valueOf(epic.get("ownerId"));
+                    row[2] = String.valueOf(epic.get("ownerName"));
 
                     tableData.add(row);
                 }
 
-                String[] headers = {"ID", "Name", "Owner ID"};
+                String[] headers = {"ID", "Name", "Owner Name"};
                 shellService.printTable(headers, tableData.toArray(new String[0][]));
             }
         } catch (Exception e) {
@@ -65,13 +66,31 @@ public class EpicShellCommand {
     public void createEpic(
             @ShellOption(value = {"-n", "--name"}, help = "Epic name") String name,
             @ShellOption(value = {"-d", "--desc"}, help = "Epic description") String description,
-            @ShellOption(value = {"-o", "--owner"}, help = "Owner ID") String ownerId,
+            @ShellOption(value = {"-o", "--owner-name"}, help = "Owner name") String ownerName,
             @ShellOption(value = {"-sp", "--story-points"}, help = "Story points", defaultValue = "0") Integer storyPoints,
             @ShellOption(value = {"-s", "--start-date"}, help = "Start date (YYYY-MM-DD)", defaultValue = ShellOption.NULL) String startDate,
             @ShellOption(value = {"-te", "--target-end-date"}, help = "Target end date (YYYY-MM-DD)", defaultValue = ShellOption.NULL) String targetEndDate
     ) {
         try {
             shellService.printHeading("Creating new epic...");
+
+            Object[] users = apiService.get("/users/search?name=" + ownerName, Object[].class);
+
+            if (users.length == 0) {
+                shellService.printError("No user found with name containing: " + ownerName);
+                return;
+            }
+
+            if (users.length > 1) {
+                shellService.printWarning("Multiple users found with that name. Please be more specific:");
+                //displayUsersTable(users);
+                return;
+            }
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> user = (Map<String, Object>) users[0];
+            String ownerId = String.valueOf(user.get("id"));
+
             Map<String, Object> epic = new HashMap<>();
             epic.put("name", name);
             epic.put("description", description);
@@ -114,24 +133,39 @@ public class EpicShellCommand {
         }
     }
 
-    @ShellMethod(key = "epic-update", value = "Update an epic")
+    @ShellMethod(key = "epic-update", value = "Update an existing epic")
     @ShellMethodAvailability("isUserLoggedIn")
     public void updateEpic(
             @ShellOption(help = "Epic ID") String epicId,
-            @ShellOption(value = {"-n", "--name"}, help = "New name", defaultValue = ShellOption.NULL) String name,
-            @ShellOption(value = {"-d", "--desc"}, help = "New description", defaultValue = ShellOption.NULL) String description,
-            @ShellOption(value = {"-sp", "--story-points"}, help = "New story points", defaultValue = ShellOption.NULL) Integer storyPoints
+            @ShellOption(value = {"-n", "--name"}, help = "Epic name", defaultValue = ShellOption.NULL) String name,
+            @ShellOption(value = {"-d", "--desc"}, help = "Epic description", defaultValue = ShellOption.NULL) String description,
+            @ShellOption(value = {"-sp", "--story-points"}, help = "Story points", defaultValue = "0") Integer storyPoints,
+            @ShellOption(value = {"-s", "--start-date"}, help = "Start date", defaultValue = ShellOption.NULL) String startDate,
+            @ShellOption(value = {"-te", "--target-end-date"}, help = "Target end date", defaultValue = ShellOption.NULL) String targetEndDate,
+            @ShellOption(value = {"-ae", "--actual-end-date"}, help = "Actual end date", defaultValue = ShellOption.NULL) String actualEndDate
     ) {
         try {
             shellService.printHeading("Updating epic...");
 
-            Map<String, Object> updates = new HashMap<>();
-            if (name != null) updates.put("name", name);
-            if (description != null) updates.put("description", description);
-            if (storyPoints != null) updates.put("storyPoints", storyPoints);
+            Object currentEpicObj = apiService.get("/epics/" + epicId, Object.class);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> currentEpic = (Map<String, Object>) currentEpicObj;
 
-            apiService.put("/epics/" + epicId, updates, Void.class);
+            Map<String, Object> updatedEpic = new HashMap<>(currentEpic);
+
+            if (description != null) updatedEpic.put("description", description);
+            if (storyPoints != null) updatedEpic.put("storyPoints", storyPoints);
+            if (startDate != null) updatedEpic.put("startDate", DateUtils.parseDate(startDate));
+            if (targetEndDate != null) updatedEpic.put("targetEndDate", DateUtils.parseDate(targetEndDate));
+            if (actualEndDate != null) updatedEpic.put("actualEndDate", DateUtils.parseDate(actualEndDate));
+
+            if (name != null) {
+                updatedEpic.put("name", name);
+            }
+
+            apiService.put("/epics/" + epicId, updatedEpic, Object.class);
             shellService.printSuccess("Epic updated successfully!");
+
         } catch (Exception e) {
             shellService.printError("Error updating epic: " + e.getMessage());
         }
@@ -141,10 +175,27 @@ public class EpicShellCommand {
     @ShellMethodAvailability("isUserLoggedIn")
     public void deleteEpic(@ShellOption(help = "Epic ID") String epicId) {
         try {
-            shellService.printHeading("Deleting epic...");
+            shellService.printHeading("Reassigning tasks before deleting epic...");
 
-            apiService.delete("/epics/" + epicId, Object.class);
+            Object[] tasks = apiService.get("/tasks?epicId=" + epicId, Object[].class);
+            if (tasks.length > 0) {
+                for (Object taskObj : tasks) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> task = (Map<String, Object>) taskObj;
+
+                    Map<String, Object> updates = new HashMap<>();
+                    updates.put("epicId", null);
+                    apiService.put("/tasks/" + task.get("id"), updates, Void.class);
+                }
+                shellService.printInfo("All associated tasks have been unlinked from the epic.");
+            } else {
+                shellService.printInfo("No tasks linked to this epic.");
+            }
+
+            shellService.printHeading("Deleting epic...");
+            apiService.delete("/epics/" + epicId, Void.class);
             shellService.printSuccess("Epic deleted successfully!");
+
         } catch (Exception e) {
             shellService.printError("Error deleting epic: " + e.getMessage());
         }

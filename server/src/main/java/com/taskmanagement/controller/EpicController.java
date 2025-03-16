@@ -25,8 +25,8 @@ public class EpicController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Epic>> getAllEpics() {
-        List<Epic> epics = epicService.getAllEpics();
+    public ResponseEntity<List<EpicDTO>> getAllEpics() {
+        List<EpicDTO> epics = epicService.getAllEpicsWithOwner();
         return ResponseEntity.ok(epics);
     }
 
