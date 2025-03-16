@@ -2,6 +2,8 @@ package com.taskmanagement.controller;
 
 import com.taskmanagement.dto.TaskDTO;
 import com.taskmanagement.dto.TaskFilterDTO;
+import com.taskmanagement.dto.TaskPriorityDTO;
+import com.taskmanagement.dto.TaskStatusDTO;
 import com.taskmanagement.service.TaskService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -213,5 +215,19 @@ public class TaskController {
         logger.info("User {} deleting task {}", userId, id);
         taskService.deleteTask(id, userId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/statuses")
+    public ResponseEntity<List<TaskStatusDTO>> getAllStatuses(@AuthenticationPrincipal UserDetails userDetails) {
+        UUID userId = UUID.fromString(userDetails.getUsername());
+        logger.info("User {} requesting all task statuses", userId);
+        return ResponseEntity.ok(taskService.getAllStatuses());
+    }
+
+    @GetMapping("/priorities")
+    public ResponseEntity<List<TaskPriorityDTO>> getAllPriorities(@AuthenticationPrincipal UserDetails userDetails) {
+        UUID userId = UUID.fromString(userDetails.getUsername());
+        logger.info("User {} requesting all task priorities", userId);
+        return ResponseEntity.ok(taskService.getAllPriorities());
     }
 }

@@ -2,6 +2,8 @@ package com.taskmanagement.service;
 
 import com.taskmanagement.dto.TaskDTO;
 import com.taskmanagement.dto.TaskFilterDTO;
+import com.taskmanagement.dto.TaskPriorityDTO;
+import com.taskmanagement.dto.TaskStatusDTO;
 import com.taskmanagement.exception.ResourceNotFound;
 import com.taskmanagement.exception.UnauthorizedAccessException;
 import com.taskmanagement.model.*;
@@ -55,12 +57,10 @@ public class TaskService {
         }
 
         try {
-            // Try parsing as simple date (yyyy-MM-dd)
             LocalDate localDate = LocalDate.parse(dateStr);
             return localDate.atStartOfDay(ZoneId.systemDefault());
         } catch (DateTimeParseException e) {
             try {
-                // If that fails, try the full ZonedDateTime format
                 return ZonedDateTime.parse(dateStr);
             } catch (DateTimeParseException ex) {
                 throw new IllegalArgumentException("Invalid date format. Please use yyyy-MM-dd format.", ex);
@@ -154,10 +154,8 @@ public class TaskService {
             throw new ResourceNotFound("Sprint not found with id: " + sprintId);
         }
 
-        // Get all statuses
         List<TaskStatus> statuses = statusRepository.findAll();
 
-        // Count tasks for each status in this sprint
         Map<String, Long> statusCounts = statuses.stream()
                 .collect(Collectors.toMap(
                         TaskStatus::getName,
@@ -204,7 +202,6 @@ public class TaskService {
         task.setEstimatedHours(taskDTO.getEstimatedHours());
         task.setDueDate(taskDTO.getDueDate());
 
-        // Handle optional fields
         if (taskDTO.getEpicId() != null) {
             Epic epic = epicRepository.findById(taskDTO.getEpicId())
                     .orElseThrow(() -> new ResourceNotFound("Epic not found with id: " + taskDTO.getEpicId()));
@@ -217,7 +214,6 @@ public class TaskService {
             task.setSprint(sprint);
         }
 
-        // Check if task is marked as completed
         if (status.getName().equals("DONE")) {
             task.setCompletedAt(ZonedDateTime.now());
         }
@@ -265,7 +261,6 @@ public class TaskService {
         existingTask.setEstimatedHours(taskDTO.getEstimatedHours());
         existingTask.setDueDate(taskDTO.getDueDate());
 
-        // Handle optional fields
         if (taskDTO.getEpicId() != null) {
             Epic epic = epicRepository.findById(taskDTO.getEpicId())
                     .orElseThrow(() -> new ResourceNotFound("Epic not found with id: " + taskDTO.getEpicId()));
@@ -318,13 +313,10 @@ public class TaskService {
         TaskStatus newStatus = statusRepository.findById(statusId)
                 .orElseThrow(() -> new ResourceNotFound("Status not found with id: " + statusId));
 
-        // Save old status for logging
         String oldStatusName = task.getStatus().getName();
 
-        // Update status
         task.setStatus(newStatus);
 
-        // Update completion time if status is DONE
         if (newStatus.getName().equals("DONE") && task.getCompletedAt() == null) {
             task.setCompletedAt(ZonedDateTime.now());
             logger.info("Task {} marked as completed", task.getId());
@@ -362,10 +354,8 @@ public class TaskService {
             throw new UnauthorizedAccessException("You don't have permission to assign this task");
         }
 
-        // Save old assignee for logging
         UUID oldAssigneeId = task.getAssignedTo().getId();
 
-        // Update assignee
         task.setAssignedTo(assignee);
 
         Task updatedTask = taskRepository.save(task);
@@ -385,16 +375,13 @@ public class TaskService {
         Sprint sprint = sprintRepository.findById(sprintId)
                 .orElseThrow(() -> new ResourceNotFound("Sprint not found with id: " + sprintId));
 
-        // Check if sprint is active
         if (!sprint.isActive()) {
             logger.warn("User {} attempted to add task {} to inactive sprint {}", userId, taskId, sprintId);
             throw new IllegalStateException("Cannot add tasks to inactive sprints");
         }
 
-        // Save the previous sprint ID for logging
         Integer previousSprintId = task.getSprint() != null ? task.getSprint().getId() : null;
 
-        // Update task with new sprint
         task.setSprint(sprint);
 
         Task updatedTask = taskRepository.save(task);
@@ -411,16 +398,13 @@ public class TaskService {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFound("Task not found with id: " + taskId));
 
-        // Check if task is actually in a sprint
         if (task.getSprint() == null) {
             logger.warn("User {} attempted to remove task {} that is not in any sprint", userId, taskId);
             throw new IllegalStateException("Task is not assigned to any sprint");
         }
 
-        // Save the previous sprint ID for logging
         Integer previousSprintId = task.getSprint().getId();
 
-        // Remove task from sprint
         task.setSprint(null);
 
         Task updatedTask = taskRepository.save(task);
@@ -439,10 +423,8 @@ public class TaskService {
         Epic epic = epicRepository.findById(epicId)
                 .orElseThrow(() -> new ResourceNotFound("Epic not found with id: " + epicId));
 
-        // Save the previous epic ID for logging
         Integer previousEpicId = task.getEpic() != null ? task.getEpic().getId() : null;
 
-        // Update task with new epic
         task.setEpic(epic);
 
         Task updatedTask = taskRepository.save(task);
@@ -459,16 +441,13 @@ public class TaskService {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFound("Task not found with id: " + taskId));
 
-        // Check if task is actually in an epic
         if (task.getEpic() == null) {
             logger.warn("User {} attempted to remove task {} that is not in any epic", userId, taskId);
             throw new IllegalStateException("Task is not assigned to any epic");
         }
 
-        // Save the previous epic ID for logging
         Integer previousEpicId = task.getEpic().getId();
 
-        // Remove task from epic
         task.setEpic(null);
 
         Task updatedTask = taskRepository.save(task);
@@ -492,12 +471,10 @@ public class TaskService {
         boolean isCreator = task.getCreatedBy().getId().equals(deleterId);
         boolean isBacklog = "BACKLOG".equals(task.getStatus().getName());
 
-        // Allow deletion if user is admin, scrum master, or if they are the creator and task is in backlog
         if (!(isAdmin || isScrumMaster || (isCreator && isBacklog))) {
             throw new UnauthorizedAccessException("You don't have permission to delete this task");
         }
 
-        // Authorization is handled by @PreAuthorize on the controller and TaskSecurity service
 
         taskRepository.deleteById(id);
         logger.info("Deleted task with ID: {}", id);
@@ -532,6 +509,38 @@ public class TaskService {
             task.setEpic(null);  // Unlink task from epic
         }
         taskRepository.saveAll(tasks);  // Batch update
+    }
+
+    @Transactional(readOnly = true)
+    public List<TaskStatusDTO> getAllStatuses() {
+        logger.debug("Fetching all task statuses");
+        return statusRepository.findAll().stream()
+                .map(this::convertStatusToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<TaskPriorityDTO> getAllPriorities() {
+        logger.debug("Fetching all task priorities");
+        return priorityRepository.findAll().stream()
+                .map(this::convertPriorityToDTO)
+                .collect(Collectors.toList());
+    }
+
+    private TaskStatusDTO convertStatusToDTO(TaskStatus status) {
+        TaskStatusDTO dto = new TaskStatusDTO();
+        dto.setId(status.getId());
+        dto.setName(status.getName());
+        dto.setDisplayOrder(status.getDisplayOrder());
+        return dto;
+    }
+
+    private TaskPriorityDTO convertPriorityToDTO(TaskPriority priority) {
+        TaskPriorityDTO dto = new TaskPriorityDTO();
+        dto.setId(priority.getId());
+        dto.setName(priority.getName());
+        dto.setValue(priority.getValue());
+        return dto;
     }
 
     private TaskDTO convertToDTO(Task task) {
