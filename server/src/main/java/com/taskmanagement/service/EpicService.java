@@ -19,13 +19,11 @@ import java.util.Optional;
 public class EpicService {
     private final EpicRepository epicRepository;
     private final UserRepository userRepository;
-    private final TaskService taskService;
     private static final Logger logger = LoggerFactory.getLogger(EpicService.class);
 
-    public EpicService(EpicRepository epicRepository, UserRepository userRepository, TaskService taskService) {
+    public EpicService(EpicRepository epicRepository, UserRepository userRepository) {
         this.epicRepository = epicRepository;
         this.userRepository = userRepository;
-        this.taskService = taskService;
     }
 
     public Epic createEpic(EpicDTO epicDTO) {
@@ -73,9 +71,7 @@ public class EpicService {
     @Transactional
     public void deleteEpic(int id) {
         epicRepository.findById(id).orElseThrow(() -> new EpicNotFoundException("Epic not found with id: " + id));
-        taskService.unlinkTasksFromEpic(id);
         epicRepository.deleteById(id);
-
         logger.info("Deleted epic with id: {}", id);
     }
 }

@@ -3,6 +3,7 @@ package com.taskmanagement.cli.command;
 import com.taskmanagement.cli.config.UserSession;
 import com.taskmanagement.cli.service.APIService;
 import com.taskmanagement.cli.service.ShellService;
+import com.taskmanagement.cli.util.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.Availability;
 import org.springframework.shell.standard.ShellComponent;
@@ -65,24 +66,47 @@ public class EpicShellCommand {
     public void createEpic(
             @ShellOption(value = {"-n", "--name"}, help = "Epic name") String name,
             @ShellOption(value = {"-d", "--desc"}, help = "Epic description") String description,
-            @ShellOption(value = {"-o", "--owner"}, help = "Owner ID") String ownerId,
+            @ShellOption(value = {"-o", "--owner-name"}, help = "Owner name") String ownerName,
             @ShellOption(value = {"-sp", "--story-points"}, help = "Story points", defaultValue = "0") Integer storyPoints,
             @ShellOption(value = {"-s", "--start-date"}, help = "Start date (YYYY-MM-DD)", defaultValue = ShellOption.NULL) String startDate,
             @ShellOption(value = {"-te", "--target-end-date"}, help = "Target end date (YYYY-MM-DD)", defaultValue = ShellOption.NULL) String targetEndDate
     ) {
         try {
             shellService.printHeading("Creating new epic...");
+
+            // Search for the user by name
+            Object[] users = apiService.get("/users/search?name=" + ownerName, Object[].class);
+
+            if (users.length == 0) {
+                shellService.printError("No user found with name containing: " + ownerName);
+                return;
+            }
+
+            if (users.length > 1) {
+                shellService.printWarning("Multiple users found with that name. Please be more specific:");
+                //displayUsersTable(users);  // You can implement this method to display the list of users
+                return;
+            }
+
+            // Get the user from the search result
+            @SuppressWarnings("unchecked")
+            Map<String, Object> user = (Map<String, Object>) users[0];
+            String ownerId = String.valueOf(user.get("id"));  // Assuming the user object contains "id"
+
+            // Create the epic object
             Map<String, Object> epic = new HashMap<>();
             epic.put("name", name);
             epic.put("description", description);
-            epic.put("ownerId", ownerId);
+            epic.put("ownerId", ownerId);  // Use the found user ID
             epic.put("storyPoints", storyPoints);
             epic.put("startDate", parseDate(startDate));
             epic.put("targetEndDate", parseDate(targetEndDate));
 
+            // Send the epic creation request
             Object createdEpic = apiService.post("/epics", epic, Object.class);
             shellService.printSuccess("Epic created successfully!");
 
+            // Display the created epic's information
             @SuppressWarnings("unchecked")
             Map<String, Object> epicResult = (Map<String, Object>) createdEpic;
             shellService.printInfo("ID: " + epicResult.get("id"));
@@ -132,6 +156,49 @@ public class EpicShellCommand {
 
             apiService.put("/epics/" + epicId, updates, Void.class);
             shellService.printSuccess("Epic updated successfully!");
+        } catch (Exception e) {
+            shellService.printError("Error updating epic: " + e.getMessage());
+        }
+    }
+
+    @ShellMethod(key = "epic-update", value = "Update an existing epic")
+    @ShellMethodAvailability("isUserLoggedIn")
+    public void updateEpic(
+            @ShellOption(help = "Epic ID") String epicId,
+            @ShellOption(value = {"-n", "--name"}, help = "Epic name", defaultValue = ShellOption.NULL) String name,
+            @ShellOption(value = {"-d", "--desc"}, help = "Epic description", defaultValue = ShellOption.NULL) String description,
+            @ShellOption(value = {"-sp", "--story-points"}, help = "Story points", defaultValue = "0") Integer storyPoints,
+            @ShellOption(value = {"-s", "--start-date"}, help = "Start date", defaultValue = ShellOption.NULL) String startDate,
+            @ShellOption(value = {"-te", "--target-end-date"}, help = "Target end date", defaultValue = ShellOption.NULL) String targetEndDate,
+            @ShellOption(value = {"-ae", "--actual-end-date"}, help = "Actual end date", defaultValue = ShellOption.NULL) String actualEndDate
+    ) {
+        try {
+            shellService.printHeading("Updating epic...");
+
+            // Fetch the current epic data from the database
+            Object currentEpicObj = apiService.get("/epics/" + epicId, Object.class);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> currentEpic = (Map<String, Object>) currentEpicObj;
+
+            // Prepare a map for the updated epic, keeping the existing values
+            Map<String, Object> updatedEpic = new HashMap<>(currentEpic);
+
+            // Update fields only if they are provided (i.e., not null)
+            if (description != null) updatedEpic.put("description", description);
+            if (storyPoints != null) updatedEpic.put("storyPoints", storyPoints);
+            if (startDate != null) updatedEpic.put("startDate", DateUtils.parseDate(startDate));
+            if (targetEndDate != null) updatedEpic.put("targetEndDate", DateUtils.parseDate(targetEndDate));
+            if (actualEndDate != null) updatedEpic.put("actualEndDate", DateUtils.parseDate(actualEndDate));
+
+            // Only update the name if it's provided
+            if (name != null) {
+                updatedEpic.put("name", name);
+            }
+
+            // Send the updated epic data to the API
+            apiService.put("/epics/" + epicId, updatedEpic, Object.class);
+            shellService.printSuccess("Epic updated successfully!");
+
         } catch (Exception e) {
             shellService.printError("Error updating epic: " + e.getMessage());
         }

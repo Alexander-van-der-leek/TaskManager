@@ -502,15 +502,6 @@ public class TaskService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional
-    public void unlinkTasksFromEpic(Integer epicId) {
-        List<Task> tasks = taskRepository.findByEpicId(epicId);
-        for (Task task : tasks) {
-            task.setEpic(null);  // Unlink task from epic
-        }
-        taskRepository.saveAll(tasks);  // Batch update
-    }
-
     @Transactional(readOnly = true)
     public List<TaskStatusDTO> getAllStatuses() {
         logger.debug("Fetching all task statuses");

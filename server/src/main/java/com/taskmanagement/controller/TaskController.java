@@ -196,17 +196,6 @@ public class TaskController {
         return ResponseEntity.ok(taskService.removeTaskFromEpic(id, userId));
     }
 
-    @PutMapping("/tasks/unlink-epic/{epicId}")
-    @PreAuthorize("hasRole('PRODUCT_OWNER') or hasRole('ADMIN')")
-    public ResponseEntity<Void> unlinkTasksFromEpic(
-            @PathVariable Integer epicId,
-            @AuthenticationPrincipal UserDetails userDetails) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
-        logger.info("User {} removing all tasks from epic {}", userId, epicId);
-        taskService.unlinkTasksFromEpic(epicId);
-        return ResponseEntity.noContent().build();
-    }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTask(
             @PathVariable Integer id,
