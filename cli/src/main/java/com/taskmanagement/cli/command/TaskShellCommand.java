@@ -52,8 +52,8 @@ public class TaskShellCommand {
             @ShellOption(value = {"-t", "--title"}, help = "Task title") String title,
             @ShellOption(value = {"-d", "--desc"}, help = "Task description") String description,
             @ShellOption(value = {"-a", "--assignee"}, help = "Assignee name") String assigneeName,
-            @ShellOption(value = {"-s", "--status"}, help = "Status ID") Integer statusId,
-            @ShellOption(value = {"-p", "--priority"}, help = "Priority ID") Integer priorityId,
+            @ShellOption(value = {"-s", "--status"}, help = "Status ID") String statusName,
+            @ShellOption(value = {"-p", "--priority"}, help = "Priority ID") String priorityName,
             @ShellOption(value = {"-due", "--due-date"}, help = "Due date (YYYY-MM-DD)") String dueDate,
             @ShellOption(value = {"-e", "--epic"}, help = "Epic ID", defaultValue = ShellOption.NULL) Integer epicId,
             @ShellOption(value = {"-sp", "--sprint"}, help = "Sprint ID", defaultValue = ShellOption.NULL) Integer sprintId,
@@ -75,6 +75,10 @@ public class TaskShellCommand {
                 displayUsersTable(users);
                 return;
             }
+
+            Integer statusId = getStatusIdByName(statusName);
+
+            Integer priorityId = getPriorityIdByName(priorityName);
 
             @SuppressWarnings("unchecked")
             Map<String, Object> user = (Map<String, Object>)users[0];
@@ -106,6 +110,8 @@ public class TaskShellCommand {
             shellService.printInfo("ID: " + taskResult.get("id"));
             shellService.printInfo("Title: " + taskResult.get("title"));
             shellService.printInfo("Assigned to: " + taskResult.get("assignedToName"));
+            shellService.printInfo("Status: " + taskResult.get("statusName"));
+            shellService.printInfo("Priority: " + taskResult.get("priorityName"));
 
         } catch (Exception e) {
             shellService.printError("Error creating task: " + e.getMessage());
@@ -152,8 +158,8 @@ public class TaskShellCommand {
             @ShellOption(value = {"-t", "--title"}, help = "Task title", defaultValue = ShellOption.NULL) String title,
             @ShellOption(value = {"-d", "--desc"}, help = "Task description", defaultValue = ShellOption.NULL) String description,
             @ShellOption(value = {"-a", "--assignee"}, help = "Assignee name", defaultValue = ShellOption.NULL) String assigneeName,
-            @ShellOption(value = {"-s", "--status"}, help = "Status ID", defaultValue = ShellOption.NULL) Integer statusId,
-            @ShellOption(value = {"-p", "--priority"}, help = "Priority ID", defaultValue = ShellOption.NULL) Integer priorityId,
+            @ShellOption(value = {"-s", "--status"}, help = "Status ID", defaultValue = ShellOption.NULL) String statusName,
+            @ShellOption(value = {"-p", "--priority"}, help = "Priority ID", defaultValue = ShellOption.NULL) String priorityName,
             @ShellOption(value = {"-due", "--due-date"}, help = "Due date (YYYY-MM-DD)", defaultValue = ShellOption.NULL) String dueDate,
             @ShellOption(value = {"-e", "--epic"}, help = "Epic ID", defaultValue = ShellOption.NULL) Integer epicId,
             @ShellOption(value = {"-sp", "--sprint"}, help = "Sprint ID", defaultValue = ShellOption.NULL) Integer sprintId,
@@ -191,8 +197,15 @@ public class TaskShellCommand {
                 updatedTask.put("assignedToId", assigneeId);
             }
 
-            if (statusId != null) updatedTask.put("statusId", statusId);
-            if (priorityId != null) updatedTask.put("priorityId", priorityId);
+            if (statusName != null) {
+                Integer statusId = getStatusIdByName(statusName);
+                updatedTask.put("statusId", statusId);
+            }
+
+            if (priorityName != null) {
+                Integer priorityId = getPriorityIdByName(priorityName);
+                updatedTask.put("priorityId", priorityId);
+            }
             if (dueDate != null) updatedTask.put("dueDate", DateUtils.parseDate(dueDate));
             if (epicId != null) updatedTask.put("epicId", epicId);
             if (sprintId != null) updatedTask.put("sprintId", sprintId);
@@ -215,10 +228,12 @@ public class TaskShellCommand {
     @ShellMethodAvailability("isUserLoggedIn")
     public void changeTaskStatus(
             @ShellOption(help = "Task ID") String taskId,
-            @ShellOption(help = "Status ID") String statusId
+            @ShellOption(help = "Status ID") String statusName
     ) {
         try {
             shellService.printHeading("Changing task status...");
+
+            Integer statusId = getStatusIdByName(statusName);
 
             Object updatedTask = apiService.patch("/tasks/" + taskId + "/status/" + statusId, null, Object.class);
             shellService.printSuccess("Task status changed successfully!");
@@ -348,8 +363,8 @@ public class TaskShellCommand {
     @ShellMethodAvailability("isUserLoggedIn")
     public void filterTasks(
             @ShellOption(value = {"-a", "--assignee"}, help = "Assignee name", defaultValue = ShellOption.NULL) String assigneeName,
-            @ShellOption(value = {"-s", "--status"}, help = "Status ID", defaultValue = ShellOption.NULL) Integer statusId,
-            @ShellOption(value = {"-p", "--priority"}, help = "Priority ID", defaultValue = ShellOption.NULL) Integer priorityId,
+            @ShellOption(value = {"-s", "--status"}, help = "Status ID", defaultValue = ShellOption.NULL) String statusName,
+            @ShellOption(value = {"-p", "--priority"}, help = "Priority ID", defaultValue = ShellOption.NULL) String priorityName,
             @ShellOption(value = {"-sp", "--sprint"}, help = "Sprint ID", defaultValue = ShellOption.NULL) Integer sprintId,
             @ShellOption(value = {"-e", "--epic"}, help = "Epic ID", defaultValue = ShellOption.NULL) Integer epicId
     ) {
@@ -378,8 +393,25 @@ public class TaskShellCommand {
                 filterParams.put("assignedToId", assigneeId);
             }
 
-            if (statusId != null) filterParams.put("statusId", statusId);
-            if (priorityId != null) filterParams.put("priorityId", priorityId);
+            if (statusName != null) {
+                try {
+                    Integer statusId = getStatusIdByName(statusName);
+                    filterParams.put("statusId", statusId);
+                } catch (Exception e) {
+                    shellService.printError("Error with status name: " + e.getMessage());
+                    return;
+                }
+            }
+
+            if (priorityName != null) {
+                try {
+                    Integer priorityId = getPriorityIdByName(priorityName);
+                    filterParams.put("priorityId", priorityId);
+                } catch (Exception e) {
+                    shellService.printError("Error with priority name: " + e.getMessage());
+                    return;
+                }
+            }
             if (sprintId != null) filterParams.put("sprintId", sprintId);
             if (epicId != null) filterParams.put("epicId", epicId);
 
@@ -480,7 +512,8 @@ public class TaskShellCommand {
     @ShellMethod(key = "task-recent", value = "List recently updated tasks")
     @ShellMethodAvailability("isUserLoggedIn")
     public void listRecentTasks(
-            @ShellOption(value = {"-h", "--hours"}, help = "Hours ago (default: 24)", defaultValue = "24") Integer hours) {
+            @ShellOption(value = { "--hours"}, help = "Hours window to check") Integer hours
+            ) {
         try {
             shellService.printHeading("Fetching tasks updated in the last " + hours + " hours...");
 
