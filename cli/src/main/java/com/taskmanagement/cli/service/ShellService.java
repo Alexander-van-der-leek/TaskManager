@@ -35,9 +35,7 @@ public class ShellService {
         terminal.flush();
     }
 
-    // For tables and structured output
     public void printTable(String[] headers, String[][] data) {
-        // Calculate column widths
         int[] colWidths = new int[headers.length];
         for (int i = 0; i < headers.length; i++) {
             colWidths[i] = headers[i].length();
@@ -49,7 +47,6 @@ public class ShellService {
             }
         }
 
-        // Print headers
         StringBuilder headerLine = new StringBuilder();
         StringBuilder dividerLine = new StringBuilder();
 
@@ -67,7 +64,6 @@ public class ShellService {
         terminal.writer().println(headerLine.toString());
         terminal.writer().println(dividerLine.toString());
 
-        // Print data
         for (String[] row : data) {
             StringBuilder dataLine = new StringBuilder();
             for (int i = 0; i < row.length; i++) {
