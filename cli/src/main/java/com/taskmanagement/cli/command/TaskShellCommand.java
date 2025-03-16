@@ -19,27 +19,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.taskmanagement.cli.util.DateUtils.parseDate;
+
 @ShellComponent
 public class TaskShellCommand {
-
-    private ZonedDateTime parseDate(String dateStr) {
-        if (dateStr == null || dateStr.trim().isEmpty()) {
-            return null;
-        }
-
-        try {
-            // Try parsing as simple date (yyyy-MM-dd)
-            LocalDate localDate = LocalDate.parse(dateStr);
-            return localDate.atStartOfDay(ZoneId.systemDefault());
-        } catch (DateTimeParseException e) {
-            try {
-                // If that fails, try the full ZonedDateTime format
-                return ZonedDateTime.parse(dateStr);
-            } catch (DateTimeParseException ex) {
-                throw new IllegalArgumentException("Invalid date format. Please use yyyy-MM-dd format.", ex);
-            }
-        }
-    }
 
     @Autowired
     private APIService apiService;
@@ -430,7 +413,7 @@ public class TaskShellCommand {
     public void overdueTasks(){
         try{
             shellService.printHeading("Getting Overdue tasks....");
-            Object[] tasks = apiService.get("/tasks/my-tasks", Object[].class);
+            Object[] tasks = apiService.get("/tasks/overdue", Object[].class);
 
             if (tasks.length == 0) {
                 shellService.printInfo("You have no overdue tasks");
