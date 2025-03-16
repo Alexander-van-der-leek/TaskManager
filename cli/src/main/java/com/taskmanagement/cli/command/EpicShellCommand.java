@@ -48,12 +48,12 @@ public class EpicShellCommand {
                     String[] row = new String[3];
                     row[0] = String.valueOf(epic.get("id"));
                     row[1] = String.valueOf(epic.get("name"));
-                    row[2] = String.valueOf(epic.get("ownerId"));
+                    row[2] = String.valueOf(epic.get("ownerName"));
 
                     tableData.add(row);
                 }
 
-                String[] headers = {"ID", "Name", "Owner ID"};
+                String[] headers = {"ID", "Name", "Owner Name"};
                 shellService.printTable(headers, tableData.toArray(new String[0][]));
             }
         } catch (Exception e) {
@@ -130,29 +130,6 @@ public class EpicShellCommand {
             shellService.printInfo("Target End Date: " + epic.get("targetEndDate"));
         } catch (Exception e) {
             shellService.printError("Error fetching epic: " + e.getMessage());
-        }
-    }
-
-    @ShellMethod(key = "epic-update", value = "Update an epic")
-    @ShellMethodAvailability("isUserLoggedIn")
-    public void updateEpic(
-            @ShellOption(help = "Epic ID") String epicId,
-            @ShellOption(value = {"-n", "--name"}, help = "New name", defaultValue = ShellOption.NULL) String name,
-            @ShellOption(value = {"-d", "--desc"}, help = "New description", defaultValue = ShellOption.NULL) String description,
-            @ShellOption(value = {"-sp", "--story-points"}, help = "New story points", defaultValue = ShellOption.NULL) Integer storyPoints
-    ) {
-        try {
-            shellService.printHeading("Updating epic...");
-
-            Map<String, Object> updates = new HashMap<>();
-            if (name != null) updates.put("name", name);
-            if (description != null) updates.put("description", description);
-            if (storyPoints != null) updates.put("storyPoints", storyPoints);
-
-            apiService.put("/epics/" + epicId, updates, Void.class);
-            shellService.printSuccess("Epic updated successfully!");
-        } catch (Exception e) {
-            shellService.printError("Error updating epic: " + e.getMessage());
         }
     }
 
