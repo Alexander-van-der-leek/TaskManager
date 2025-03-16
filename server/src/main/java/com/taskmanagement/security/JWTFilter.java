@@ -30,6 +30,9 @@ public class JWTFilter extends OncePerRequestFilter {
 
         if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
             Authentication authentication = tokenProvider.getAuthentication(jwt);
+            System.out.println("Authenticated user: " + authentication.getName());
+            System.out.println("Roles: " + authentication.getAuthorities());
+
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 
@@ -38,6 +41,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
     private String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
+        System.out.println("Extracted Token: " + bearerToken);
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
             return bearerToken.substring(7);
         }

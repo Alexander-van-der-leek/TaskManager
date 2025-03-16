@@ -83,6 +83,31 @@ import java.util.stream.Collectors;
             }
             sprintRepository.deleteById(id);
         }
+        public SprintDTO startSprint(UUID sprintId) {
+            Sprint sprint = sprintRepository.findById(sprintId)
+                    .orElseThrow(() -> new SprintNotFoundException(sprintId));
+
+            // Start the sprint: Set active and start date
+            sprint.setActive(true);
+            sprint.setStartDate(ZonedDateTime.now());
+            sprint.setUpdatedAt(ZonedDateTime.now());
+
+            Sprint updatedSprint = sprintRepository.save(sprint);
+            return mapToDTO(updatedSprint);
+        }
+
+        public SprintDTO endSprint(UUID sprintId) {
+            Sprint sprint = sprintRepository.findById(sprintId)
+                    .orElseThrow(() -> new SprintNotFoundException(sprintId));
+
+            // End the sprint: Set inactive and end date
+            sprint.setActive(false);
+            sprint.setEndDate(ZonedDateTime.now());
+            sprint.setUpdatedAt(ZonedDateTime.now());
+
+            Sprint updatedSprint = sprintRepository.save(sprint);
+            return mapToDTO(updatedSprint);
+        }
 
         private SprintDTO mapToDTO(Sprint sprint) {
             SprintDTO sprintDTO = new SprintDTO();
