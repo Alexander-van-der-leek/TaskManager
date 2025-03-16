@@ -9,7 +9,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,7 +28,16 @@ public class UserController {
     public ResponseEntity<List<UserDTO>> getAllUsers(@AuthenticationPrincipal UserDetails userDetails) {
         UUID userId = UUID.fromString(userDetails.getUsername());
         logger.info("User {} requesting all users", userId);
-        return ResponseEntity.ok(userService.getAllUsers(userId));
+        return ResponseEntity.ok(userService.getAllUsers());
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<UserDTO>> searchUsersByName(
+            @RequestParam String name,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        UUID userId = UUID.fromString(userDetails.getUsername());
+        logger.info("User {} searching users by name containing: {}", userId, name);
+        return ResponseEntity.ok(userService.searchUsersByName(name));
     }
 
     @GetMapping("/{id}")
@@ -37,37 +45,7 @@ public class UserController {
             @PathVariable UUID id,
             @AuthenticationPrincipal UserDetails userDetails) {
         UUID userId = UUID.fromString(userDetails.getUsername());
-        logger.info("User {} requesting user {}", userId, id);
-        return ResponseEntity.ok(userService.getUserById(id, userId));
-    }
-
-    @PostMapping
-    public ResponseEntity<UserDTO> createUser(
-            @Valid @RequestBody UserDTO userDTO,
-            @AuthenticationPrincipal UserDetails userDetails) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
-        logger.info("User {} creating a new user", userId);
-        return ResponseEntity.ok(userService.createUser(userDTO, userId));
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<UserDTO> updateUser(
-            @PathVariable UUID id,
-            @Valid @RequestBody UserDTO userDTO,
-            @AuthenticationPrincipal UserDetails userDetails) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
-        logger.info("User {} updating user {}", userId, id);
-        userDTO.setId(id);
-        return ResponseEntity.ok(userService.updateUser(userDTO, userId));
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deactivateUser(
-            @PathVariable UUID id,
-            @AuthenticationPrincipal UserDetails userDetails) {
-        UUID userId = UUID.fromString(userDetails.getUsername());
-        logger.info("User {} deactivating user {}", userId, id);
-        userService.deactivateUser(id, userId);
-        return ResponseEntity.noContent().build();
+        logger.info("User {} requesting user details for: {}", userId, id);
+        return ResponseEntity.ok(userService.getUserById(id));
     }
 }

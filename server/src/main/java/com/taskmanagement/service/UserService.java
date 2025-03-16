@@ -1,11 +1,14 @@
 package com.taskmanagement.service;
 
 import com.taskmanagement.dto.UserDTO;
-import com.taskmanagement.model.Role;
+import com.taskmanagement.exception.ResourceNotFound;
 import com.taskmanagement.model.User;
 import com.taskmanagement.repository.UserRepository;
-import com.taskmanagement.repository.RoleRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -13,81 +16,44 @@ import java.util.stream.Collectors;
 @Service
 public class UserService {
 
-    private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
-    public UserService(UserRepository userRepository, RoleRepository roleRepository) {
+    private final UserRepository userRepository;
+
+    public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
     }
 
-    public List<UserDTO> getAllUsers(UUID userId) {
-        return userRepository.findAll()
-                .stream()
+    @Transactional(readOnly = true)
+    public List<UserDTO> getAllUsers() {
+        logger.debug("Fetching all users");
+        return userRepository.findAll().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
-    public UserDTO getUserById(UUID id, UUID userId) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        return convertToDTO(user);
+    @Transactional(readOnly = true)
+    public UserDTO getUserById(UUID id) {
+        logger.debug("Fetching user with ID: {}", id);
+        return userRepository.findById(id)
+                .map(this::convertToDTO)
+                .orElseThrow(() -> new ResourceNotFound("User not found with id: " + id));
     }
 
-
-    public UserDTO createUser(UserDTO userDTO, UUID userId) {
-
-        Role role = roleRepository.findById(userDTO.getRole().getId())
-                .orElseThrow(() -> new RuntimeException("Role not found"));
-
-        User user = new User();
-        user.setId(UUID.randomUUID());
-        user.setRole(role);
-        user.setEmail(userDTO.getEmail());
-        user.setName(userDTO.getName());
-        user.setGoogleId(userDTO.getGoogleId());
-        user.setIsActive(true);
-        User savedUser = userRepository.save(user);
-        return convertToDTO(savedUser);
+    @Transactional(readOnly = true)
+    public List<UserDTO> searchUsersByName(String name) {
+        logger.debug("Searching users with name containing: {}", name);
+        return userRepository.findByNameContainingIgnoreCase(name).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
-
-    public UserDTO updateUser(UserDTO userDTO, UUID userId) {
-        User user = userRepository.findById(userDTO.getId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        if (userDTO.getRole() != null) {
-            Role role = roleRepository.findById(userDTO.getRole().getId())
-                    .orElseThrow(() -> new RuntimeException("Role not found"));
-            user.setRole(role);
-        }
-
-        user.setName(userDTO.getName());
-        user.setEmail(userDTO.getEmail());
-        user.setGoogleId(userDTO.getGoogleId());
-
-        User updatedUser = userRepository.save(user);
-        return convertToDTO(updatedUser);
-    }
-
-
-    public void deactivateUser(UUID id, UUID userId) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        user.setIsActive(false);
-
-        userRepository.save(user);
-    }
-
 
     private UserDTO convertToDTO(User user) {
-        return new UserDTO(
-                user.getId(),
-                user.getRole(),
-                user.getEmail(),
-                user.getName(),
-                user.getGoogleId(),
-                user.getCreatedAt(),
-                user.getUpdatedAt()
-        );
+        UserDTO dto = new UserDTO();
+        dto.setId(user.getId());
+        dto.setName(user.getName());
+        dto.setEmail(user.getEmail());
+        dto.setRoleName(user.getRole().getName());
+        return dto;
     }
 }
