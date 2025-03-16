@@ -12,3 +12,8 @@ output "cli_bucket_name" {
   description = "S3 bucket name for CLI distribution"
   value       = aws_s3_bucket.cli_bucket.bucket
 }
+
+output "alb_dns_name" {
+  description = "Application Load Balancer DNS name"
+  value       = aws_lb.app_lb.dns_name
+}

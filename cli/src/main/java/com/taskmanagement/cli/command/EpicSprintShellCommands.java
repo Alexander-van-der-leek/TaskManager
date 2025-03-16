@@ -20,6 +20,7 @@ import java.util.*;
 
 @ShellComponent
 public class EpicSprintShellCommands {
+
     @Autowired
     private UserSession userSession;
 

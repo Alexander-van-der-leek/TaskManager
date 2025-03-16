@@ -33,6 +33,19 @@ flyway {
     baselineOnMigrate = true
 }
 
+processResources {
+    filesMatching("application.yml") {
+        expand([
+                JWT_SECRET:project.findProperty("JWT_SECRET") ?: "yoursercretkeyyoursercretkeyyoursercretkeyyoursercretkey",
+                GOOGLE_CLIENT_ID:project.findProperty("GOOGLE_CLIENT_ID") ?: "placeholder",
+                DB_PASSWORD:project.findProperty("DB_PASSWORD") ?: "placeholderdbpassword",
+                DB_USERNAME:project.findProperty("DB_USERNAME") ?: "placeholderdbuser",
+                DB_CONNECTION_STRING:project.findProperty("DB_CONNECTION_STRING") ?: "jdbc:postgresql://localhost:5432/taskmanagement",
+        ])
+    }
+}
+
+
 bootJar {
     archiveFileName = 'taskmanagement-server.jar'
 }

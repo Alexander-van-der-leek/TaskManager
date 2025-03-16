@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 
         public SprintDTO createSprint(SprintDTO sprintDTO) {
             Sprint sprint = new Sprint();
-            sprint.setId(UUID.randomUUID());
+
             sprint.setName(sprintDTO.getName());
             sprint.setGoal(sprintDTO.getGoal());
             sprint.setCapacityPoints(sprintDTO.getCapacityPoints());
@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
             return mapToDTO(savedSprint);
         }
 
-        public SprintDTO getSprintById(UUID id) {
+        public SprintDTO getSprintById(Integer id) {
             Sprint sprint = sprintRepository.findById(id)
                     .orElseThrow(() -> new SprintNotFoundException(id));
             return mapToDTO(sprint);
@@ -57,7 +57,7 @@ import java.util.stream.Collectors;
             return sprints.stream().map(this::mapToDTO).collect(Collectors.toList());
         }
 
-        public SprintDTO updateSprint(UUID id, SprintDTO sprintDTO) {
+        public SprintDTO updateSprint(Integer id, SprintDTO sprintDTO) {
             Sprint sprint = sprintRepository.findById(id)
                     .orElseThrow(() -> new SprintNotFoundException(id));
 
@@ -77,13 +77,13 @@ import java.util.stream.Collectors;
             return mapToDTO(updatedSprint);
         }
 
-        public void deleteSprint(UUID id) {
+        public void deleteSprint(Integer id) {
             if (!sprintRepository.existsById(id)) {
                 throw new SprintNotFoundException(id);
             }
             sprintRepository.deleteById(id);
         }
-        public SprintDTO startSprint(UUID sprintId) {
+        public SprintDTO startSprint(Integer sprintId) {
             Sprint sprint = sprintRepository.findById(sprintId)
                     .orElseThrow(() -> new SprintNotFoundException(sprintId));
 
@@ -96,7 +96,7 @@ import java.util.stream.Collectors;
             return mapToDTO(updatedSprint);
         }
 
-        public SprintDTO endSprint(UUID sprintId) {
+        public SprintDTO endSprint(Integer sprintId) {
             Sprint sprint = sprintRepository.findById(sprintId)
                     .orElseThrow(() -> new SprintNotFoundException(sprintId));
 
