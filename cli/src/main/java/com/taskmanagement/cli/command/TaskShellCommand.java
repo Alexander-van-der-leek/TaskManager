@@ -518,6 +518,70 @@ public class TaskShellCommand {
         }
     }
 
+    @ShellMethod(key = "status-list", value = "List all available task statuses")
+    @ShellMethodAvailability("isUserLoggedIn")
+    public void listStatuses() {
+        try {
+            shellService.printHeading("Fetching Available Statuses...");
+
+            Object[] statuses = apiService.get("/tasks/statuses", Object[].class);
+            if (statuses.length == 0) {
+                shellService.printInfo("No statuses found");
+            } else {
+                List<String[]> tableData = new ArrayList<>();
+
+                for (Object statusObj : statuses) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> status = (Map<String, Object>) statusObj;
+
+                    String[] row = new String[3];
+                    row[0] = String.valueOf(status.get("id"));
+                    row[1] = String.valueOf(status.get("name"));
+                    row[2] = String.valueOf(status.get("displayOrder"));
+
+                    tableData.add(row);
+                }
+
+                String[] headers = {"ID", "Name", "Display Order"};
+                shellService.printTable(headers, tableData.toArray(new String[0][]));
+            }
+        } catch (Exception e) {
+            shellService.printError("Error fetching statuses: " + e.getMessage());
+        }
+    }
+
+    @ShellMethod(key = "priority-list", value = "List all available task priorities")
+    @ShellMethodAvailability("isUserLoggedIn")
+    public void listPriorities() {
+        try {
+            shellService.printHeading("Fetching Available Priorities...");
+
+            Object[] priorities = apiService.get("/tasks/priorities", Object[].class);
+            if (priorities.length == 0) {
+                shellService.printInfo("No priorities found");
+            } else {
+                List<String[]> tableData = new ArrayList<>();
+
+                for (Object priorityObj : priorities) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> priority = (Map<String, Object>) priorityObj;
+
+                    String[] row = new String[3];
+                    row[0] = String.valueOf(priority.get("id"));
+                    row[1] = String.valueOf(priority.get("name"));
+                    row[2] = String.valueOf(priority.get("value"));
+
+                    tableData.add(row);
+                }
+
+                String[] headers = {"ID", "Name", "Value"};
+                shellService.printTable(headers, tableData.toArray(new String[0][]));
+            }
+        } catch (Exception e) {
+            shellService.printError("Error fetching priorities: " + e.getMessage());
+        }
+    }
+
     private void displayTasksTable(Object[] tasks) {
         List<String[]> tableData = new ArrayList<>();
 
