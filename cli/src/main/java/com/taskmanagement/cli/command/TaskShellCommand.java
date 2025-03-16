@@ -622,6 +622,76 @@ public class TaskShellCommand {
         shellService.printTable(headers, tableData.toArray(new String[0][]));
     }
 
+    private Integer getStatusIdByName(String statusName) throws Exception {
+        Object[] statuses = apiService.get("/tasks/statuses", Object[].class);
+
+        List<Map<String, Object>> matchingStatuses = new ArrayList<>();
+        for (Object statusObj : statuses) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> status = (Map<String, Object>) statusObj;
+            String name = String.valueOf(status.get("name"));
+
+            if (name.equalsIgnoreCase(statusName)) {
+                return Integer.valueOf(String.valueOf(status.get("id")));
+            }
+
+            if (name.toLowerCase().contains(statusName.toLowerCase())) {
+                matchingStatuses.add(status);
+            }
+        }
+
+        if (matchingStatuses.isEmpty()) {
+            shellService.printError("No status found with name containing: " + statusName);
+            shellService.printInfo("Available statuses:");
+            listStatuses();
+            throw new IllegalArgumentException("Invalid status name: " + statusName);
+        }
+
+        if (matchingStatuses.size() > 1) {
+            shellService.printWarning("Multiple statuses found matching: " + statusName);
+            shellService.printInfo("Please be more specific or use the status ID. Available statuses:");
+            listStatuses();
+            throw new IllegalArgumentException("Ambiguous status name: " + statusName);
+        }
+
+        return Integer.valueOf(String.valueOf(matchingStatuses.get(0).get("id")));
+    }
+
+    private Integer getPriorityIdByName(String priorityName) throws Exception {
+        Object[] priorities = apiService.get("/tasks/priorities", Object[].class);
+
+        List<Map<String, Object>> matchingPriorities = new ArrayList<>();
+        for (Object priorityObj : priorities) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> priority = (Map<String, Object>) priorityObj;
+            String name = String.valueOf(priority.get("name"));
+
+            if (name.equalsIgnoreCase(priorityName)) {
+                return Integer.valueOf(String.valueOf(priority.get("id")));
+            }
+
+            if (name.toLowerCase().contains(priorityName.toLowerCase())) {
+                matchingPriorities.add(priority);
+            }
+        }
+
+        if (matchingPriorities.isEmpty()) {
+            shellService.printError("No priority found with name containing: " + priorityName);
+            shellService.printInfo("Available priorities:");
+            listPriorities();
+            throw new IllegalArgumentException("Invalid priority name: " + priorityName);
+        }
+
+        if (matchingPriorities.size() > 1) {
+            shellService.printWarning("Multiple priorities found matching: " + priorityName);
+            shellService.printInfo("Please be more specific or use the priority ID. Available priorities:");
+            listPriorities();
+            throw new IllegalArgumentException("Ambiguous priority name: " + priorityName);
+        }
+
+        return Integer.valueOf(String.valueOf(matchingPriorities.get(0).get("id")));
+    }
+
     public Availability isUserLoggedIn() {
         return userSession.isAuthenticated()
                 ? Availability.available()
