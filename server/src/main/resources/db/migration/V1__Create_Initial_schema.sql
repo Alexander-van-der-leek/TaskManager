@@ -1,17 +1,18 @@
+
 -- Create extension for UUID generation
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE roles (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(50) NOT NULL UNIQUE,
     description TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    role_id INT NOT NULL REFERENCES roles(id),
+    role_id UUID NOT NULL UNIQUE REFERENCES roles(id),
     email VARCHAR(255) NOT NULL UNIQUE,
     name VARCHAR(255) NOT NULL,
     google_id VARCHAR(255) NOT NULL UNIQUE,
@@ -36,7 +37,7 @@ CREATE TABLE sprints (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     goal TEXT NOT NULL,
-    scrum_master_id UUID NOT NULL REFERENCES users(role_id),
+    scrum_master_id UUID NOT NULL REFERENCES users(id),
     capacity_points INT NOT NULL,
     start_date TIMESTAMP WITH TIME ZONE NOT NULL,
     end_date TIMESTAMP WITH TIME ZONE NOT NULL,

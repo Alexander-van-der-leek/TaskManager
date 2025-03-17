@@ -66,8 +66,8 @@ public class AuthService {
     private User createNewUser(GoogleTokenVerifier.GoogleUserInfo googleUserInfo) {
         logger.info("Creating new user for Google account: {}", googleUserInfo.getEmail());
 
-        // Get the default role (DEVELOPER)
-        Role defaultRole = roleRepository.findByName("DEVELOPER")
+        // Get the default role (SCRUM_MASTER)
+        Role defaultRole = roleRepository.findByName("SCRUM_MASTER")
                 .orElseThrow(() -> new IllegalStateException("Default role not found"));
 
         User newUser = new User();
