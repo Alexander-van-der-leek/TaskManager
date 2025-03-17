@@ -1,7 +1,5 @@
 package com.taskmanagement.exception;
 
-import com.taskmanagement.model.User;
-
 import java.util.UUID;
 
 public class UserNotFoundException extends RuntimeException{

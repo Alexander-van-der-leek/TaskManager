@@ -9,6 +9,7 @@ import com.taskmanagement.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -48,6 +49,10 @@ public class EpicService {
         return epicRepository.findAll();
     }
 
+    public List<EpicDTO> getAllEpicsWithOwner() {
+        return epicRepository.findAllWithOwner();
+    }
+
     public Optional<Epic> getEpicById(int id) {
         return epicRepository.findById(id);
     }
@@ -67,10 +72,10 @@ public class EpicService {
         }).orElseThrow(() -> new EpicNotFoundException("Epic not found with id: " + id));
     }
 
+    @Transactional
     public void deleteEpic(int id) {
         epicRepository.findById(id).orElseThrow(() -> new EpicNotFoundException("Epic not found with id: " + id));
         epicRepository.deleteById(id);
-
         logger.info("Deleted epic with id: {}", id);
     }
 }
