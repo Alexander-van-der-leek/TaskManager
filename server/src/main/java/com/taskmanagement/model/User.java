@@ -23,6 +23,9 @@ public class User {
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
+    private Boolean isActive;
+
     @Column(name = "google_id", nullable = false, unique = true)
     private String googleId;
 

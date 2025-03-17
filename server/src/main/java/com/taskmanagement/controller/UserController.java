@@ -4,11 +4,15 @@ import com.taskmanagement.dto.UserDTO;
 import com.taskmanagement.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,12 +44,58 @@ public class UserController {
         return ResponseEntity.ok(userService.searchUsersByName(name));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> getUserById(
-            @PathVariable UUID id,
+    @PutMapping("/update")
+    public ResponseEntity<UserDTO> updateUser(
+            @RequestParam String name,
+            @Valid @RequestBody UserDTO userDTO,
             @AuthenticationPrincipal UserDetails userDetails) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        // Check if the current user has the required role
+        boolean hasAdminRole = authentication.getAuthorities().stream()
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN") ||
+                        grantedAuthority.getAuthority().equals("ROLE_SUPER_ADMIN"));
+
+        if (!hasAdminRole) {
+            UserDTO errorDTO = new UserDTO();
+            errorDTO.setName("Error: Insufficient Permissions");
+            errorDTO.setEmail("You do not have permission to update users.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorDTO);
+        }
         UUID userId = UUID.fromString(userDetails.getUsername());
-        logger.info("User {} requesting user details for: {}", userId, id);
-        return ResponseEntity.ok(userService.getUserById(id));
+        logger.info("User {} updating user with name {}", userId, name);
+
+        UserDTO updatedUser = userService.updateUser(userDTO, name, userId);
+        if (updatedUser == null) {
+            logger.error("User with name {} not found", name);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        return ResponseEntity.ok(updatedUser);
+    }
+
+    @PutMapping("/deactivate")
+    public ResponseEntity<String> deactivateUser(
+            @RequestParam String name,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        if (!hasRequiredRole(userDetails)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("You are not authorized to deactivate users.");
+        }
+
+        boolean success = userService.deactivateUser(name);
+        if (success) {
+            return ResponseEntity.ok("User " + name + " has been deactivated successfully.");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("No user found with the name: " + name);
+        }
+    }
+
+//     Helper method to check if the user has either ROLE_ADMIN or ROLE_SUPER_ADMIN role.
+    private boolean hasRequiredRole(UserDetails userDetails) {
+        return userDetails.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()) ||
+                        "ROLE_SUPER_ADMIN".equals(authority.getAuthority()));
     }
 }
