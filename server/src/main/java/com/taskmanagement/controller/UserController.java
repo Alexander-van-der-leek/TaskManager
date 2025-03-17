@@ -53,8 +53,7 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         // Check if the current user has the required role
         boolean hasAdminRole = authentication.getAuthorities().stream()
-                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN") ||
-                        grantedAuthority.getAuthority().equals("ROLE_SUPER_ADMIN"));
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ADMIN"));
 
         if (!hasAdminRole) {
             UserDTO errorDTO = new UserDTO();
@@ -95,7 +94,6 @@ public class UserController {
 //     Helper method to check if the user has either ROLE_ADMIN or ROLE_SUPER_ADMIN role.
     private boolean hasRequiredRole(UserDetails userDetails) {
         return userDetails.getAuthorities().stream()
-                .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()) ||
-                        "ROLE_SUPER_ADMIN".equals(authority.getAuthority()));
+                .anyMatch(authority -> "ADMIN".equals(authority.getAuthority()));
     }
 }

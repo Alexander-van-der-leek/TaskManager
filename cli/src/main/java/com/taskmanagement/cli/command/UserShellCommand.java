@@ -104,8 +104,8 @@ public class UserShellCommand {
 
         var authorities = authentication.getAuthorities();
         return authorities.stream()
-                .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()) ||
-                        "ROLE_SUPER_ADMIN".equals(authority.getAuthority()));
+                .anyMatch(authority -> "ADMIN".equals(authority.getAuthority()));
+
     }
 
     private boolean isUserActive(Map<String, Object> user) {
