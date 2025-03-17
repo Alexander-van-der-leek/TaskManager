@@ -18,6 +18,9 @@ public class EpicDTO {
     private ZonedDateTime startDate;
     private ZonedDateTime targetEndDate;
 
+    public EpicDTO() {
+    }
+
     public EpicDTO(Integer id, String name, String ownerName) {
         this.id = id;
         this.name = name;
