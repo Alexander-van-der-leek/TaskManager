@@ -10,7 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -21,10 +20,14 @@ public class UserSession {
     private static final String TOKEN_KEY = "token";
     private static final String USER_NAME_KEY = "userName";
     private static final String USER_EMAIL_KEY = "userEmail";
+    private static final String USER_ID_KEY = "userId";
+    private static final String USER_ROLE_KEY = "userRole";
 
     private String token;
     private String userName;
     private String userEmail;
+    private String userId;
+    private String userRole;
 
     public UserSession() {
         loadFromFile();
@@ -58,11 +61,30 @@ public class UserSession {
         this.userEmail = userEmail;
     }
 
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getUserRole() {
+        return userRole;
+    }
+
+    public void setUserRole(String userRole) {
+        this.userRole = userRole;
+    }
+
+
     public void saveToFile() {
         Properties properties = new Properties();
         properties.setProperty(TOKEN_KEY, token != null ? token : "");
         properties.setProperty(USER_NAME_KEY, userName != null ? userName : "");
         properties.setProperty(USER_EMAIL_KEY, userEmail != null ? userEmail : "");
+        properties.setProperty(USER_ID_KEY, userId != null ? userId : "");
+        properties.setProperty(USER_ROLE_KEY, userRole != null ? userRole : "");
 
         File sessionFile = getSessionFile();
         try (FileOutputStream out = new FileOutputStream(sessionFile)) {
@@ -100,6 +122,8 @@ public class UserSession {
                 token = properties.getProperty(TOKEN_KEY);
                 userName = properties.getProperty(USER_NAME_KEY);
                 userEmail = properties.getProperty(USER_EMAIL_KEY);
+                userId = properties.getProperty(USER_ID_KEY);
+                userRole = properties.getProperty(USER_ROLE_KEY);
             } catch (IOException e) {
                 System.err.println("Error loading session: " + e.getMessage());
                 token = null;
