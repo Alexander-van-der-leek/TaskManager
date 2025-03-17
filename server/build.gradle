@@ -29,7 +29,7 @@ dependencies {
 flyway {
     url = 'jdbc:postgresql://localhost:5432/taskmanagement'
     user = 'postgres'
-    password = 'Thandeka22'
+    password = 'admin'
     baselineOnMigrate = true
 }
 
