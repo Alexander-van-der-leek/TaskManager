@@ -74,6 +74,7 @@ public class AuthService {
         newUser.setId(UUID.randomUUID());
         newUser.setGoogleId(googleUserInfo.getGoogleId());
         newUser.setEmail(googleUserInfo.getEmail());
+        newUser.setIsActive(true);
 
         String name = googleUserInfo.getName();
         if (name == null || name.trim().isEmpty()) {
