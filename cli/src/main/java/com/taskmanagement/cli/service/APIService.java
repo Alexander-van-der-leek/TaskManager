@@ -61,7 +61,6 @@ public class APIService {
         }
     }
 
-    // Generic method for authenticated GET requests
     public <T> T get(String uri, Class<T> responseType) {
         try {
             return webClient.get()
@@ -76,7 +75,6 @@ public class APIService {
         }
     }
 
-    // Generic method for authenticated POST requests
     public <T> T post(String uri, Object body, Class<T> responseType) {
         try{
             return webClient.post()
@@ -92,7 +90,6 @@ public class APIService {
         }
     }
 
-    // Generic method for authenticated PUT requests
     public <T> T put(String uri, Object body, Class<T> responseType) {
         try {
             return webClient.put()
@@ -108,7 +105,6 @@ public class APIService {
         }
     }
 
-    // Generic method for authenticated PATCH requests
     public <T> T patch(String uri, Object body, Class<T> responseType) {
         try {
             return webClient.patch()
@@ -124,7 +120,6 @@ public class APIService {
         }
     }
 
-    // Generic method for authenticated DELETE requests
     public <T> T delete(String uri, Class<T> responseType) {
         try {
             return webClient.delete()
@@ -143,9 +138,15 @@ public class APIService {
         try {
             Map<String, Object> errorResponse = objectMapper.readValue(
                     ex.getResponseBodyAsString(), new TypeReference<Map<String, Object>>() {});
-            String errorMessage = (String) errorResponse.getOrDefault("message",
+            String originalMessage = (String) errorResponse.getOrDefault("message",
                     "Unknown error: " + ex.getMessage());
-            throw new RuntimeException(errorMessage);
+
+            String cleanedMessage = originalMessage;
+            if (originalMessage.startsWith("An unexpected error occurred: ")) {
+                cleanedMessage = originalMessage.substring("An unexpected error occurred: ".length());
+            }
+
+            throw new RuntimeException(cleanedMessage);
         } catch (JsonProcessingException jsonException) {
             throw new RuntimeException("API Error: " + ex.getStatusCode() + " - " + ex.getMessage());
         }

@@ -19,7 +19,6 @@ public class ShellConfig {
         return () -> {
             String prompt = "task-cli";
 
-            // Show username in prompt when logged in
             if (userSession.isAuthenticated()) {
                 prompt += ":" + userSession.getUserName().split(" ")[0].toLowerCase();
             }

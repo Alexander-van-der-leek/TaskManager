@@ -49,8 +49,6 @@ public class AuthController {
 
     @GetMapping("/validate")
     public ResponseEntity<String> validateToken() {
-        // This endpoint will be protected by JWT authentication
-        // If we reach here, it means the token is valid
         return ResponseEntity.ok("Token is valid");
     }
 }

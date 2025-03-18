@@ -21,10 +21,8 @@ public class WelcomeCommand {
     @Autowired
     private UserSession userSession;
 
-    // This is no longer a shell command, just a regular method that can be called programmatically
     public void welcome() {
         try {
-            // Read banner from resources
             BufferedReader reader = new BufferedReader(
                     new InputStreamReader(new ClassPathResource("banner.txt").getInputStream()));
             String banner = reader.lines().collect(Collectors.joining("\n"));
@@ -41,7 +39,6 @@ public class WelcomeCommand {
                 shellService.printInfo("Type 'help' to see all available commands.");
             }
         } catch (Exception e) {
-            // If banner can't be loaded, just show a simple message
             shellService.printHeading("\nWelcome to Task Management CLI!");
 
             if (userSession.isAuthenticated()) {

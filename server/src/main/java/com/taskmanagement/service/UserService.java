@@ -46,7 +46,6 @@ public class UserService {
     public UserDTO updateUser( UserDTO userDTO, String name,UUID id) {
         logger.info("Updating user with ID: {}", id);
 
-        // Fetch the user by ID
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFound("User not found with ID: " + id));
 
@@ -71,7 +70,6 @@ public class UserService {
 
     @Transactional
     public boolean deactivateUser(String name) {
-        // Fetch users by name
         List<User> users = userRepository.findByNameContainingIgnoreCase(name);
 
         if (users.isEmpty()) {

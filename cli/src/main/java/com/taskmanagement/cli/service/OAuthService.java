@@ -47,7 +47,6 @@ public class OAuthService {
     public String waitForAuthorizationCode() throws IOException, InterruptedException {
         authFuture = new CompletableFuture<>();
 
-        // Start local HTTP server to capture the response
         HttpServer server = HttpServer.create(new InetSocketAddress(8888), 0);
 
         server.createContext("/callback", exchange -> {
@@ -81,7 +80,6 @@ public class OAuthService {
         server.start();
 
         try {
-            // Wait for the authentication to complete
             String idToken = authFuture.get(5, TimeUnit.MINUTES);
             return idToken;
         } catch (Exception e) {
