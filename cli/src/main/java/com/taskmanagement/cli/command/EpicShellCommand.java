@@ -178,6 +178,7 @@ public class EpicShellCommand {
             shellService.printHeading("Reassigning tasks before deleting epic...");
 
             Object[] tasks = apiService.get("/tasks?epicId=" + epicId, Object[].class);
+
             if (tasks.length > 0) {
                 for (Object taskObj : tasks) {
                     @SuppressWarnings("unchecked")
@@ -185,7 +186,8 @@ public class EpicShellCommand {
 
                     Map<String, Object> updates = new HashMap<>();
                     updates.put("epicId", null);
-                    apiService.put("/tasks/" + task.get("id"), updates, Void.class);
+
+                    apiService.patch("/tasks/" + task.get("id") + "/remove-epic", updates, Void.class);
                 }
                 shellService.printInfo("All associated tasks have been unlinked from the epic.");
             } else {

@@ -598,6 +598,14 @@ public class TaskService {
         return dto;
     }
 
+    public TaskDTO removeEpicFromTask(Integer taskId, UUID userId) {
+        TaskDTO task = getTaskById(taskId, userId);
+
+        task.setEpicId(null);
+
+        return updateTask(task, userId);
+    }
+
     private void validateTaskSprintDateCompatibility(ZonedDateTime taskDueDate, Sprint sprint) {
         if (taskDueDate != null && sprint.getEndDate() != null && taskDueDate.isAfter(sprint.getEndDate())) {
             throw new IllegalStateException(

@@ -219,4 +219,16 @@ public class TaskController {
         logger.info("User {} requesting all task priorities", userId);
         return ResponseEntity.ok(taskService.getAllPriorities());
     }
+
+    @PatchMapping("/{id}/remove-epic")
+    @PreAuthorize("hasRole('PRODUCT_OWNER') or hasRole('ADMIN')")
+    public ResponseEntity<TaskDTO> removeEpicFromTask(
+            @PathVariable Integer id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        UUID userId = UUID.fromString(userDetails.getUsername());
+        logger.info("User {} removing epic from task {}", userId, id);
+
+        // Call the service to remove the epicId from the task without affecting other fields
+        return ResponseEntity.ok(taskService.removeEpicFromTask(id, userId));
+    }
 }
