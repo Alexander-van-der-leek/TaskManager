@@ -5,6 +5,7 @@ import com.taskmanagement.model.Epic;
 import com.taskmanagement.service.EpicService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +20,7 @@ public class EpicController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('PRODUCT_OWNER') or hasRole('ADMIN')")
     public ResponseEntity<Epic> createEpic(@RequestBody EpicDTO epicDTO) {
         Epic createdEpic = epicService.createEpic(epicDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdEpic);
@@ -38,12 +40,14 @@ public class EpicController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SCRUM_MASTER') or @epicService.isOwner(#id, authentication.principal.username)")
     public ResponseEntity<Epic> updateEpic(@PathVariable Integer id, @RequestBody EpicDTO epicDTO) {
         Epic updatedEpic = epicService.updateEpic(id, epicDTO);
         return ResponseEntity.ok(updatedEpic);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or @epicService.isOwner(#id, authentication.principal.username)")
     public ResponseEntity<Void> deleteEpic(@PathVariable Integer id) {
         epicService.deleteEpic(id);
         return ResponseEntity.noContent().build();

@@ -533,6 +533,14 @@ public class TaskService {
         return dto;
     }
 
+    public TaskDTO removeEpicFromTask(Integer taskId, UUID userId) {
+        TaskDTO task = getTaskById(taskId, userId);
+
+        task.setEpicId(null);
+
+        return updateTask(task, userId);
+    }
+
     private TaskDTO convertToDTO(Task task) {
         TaskDTO dto = new TaskDTO();
         dto.setId(task.getId());

@@ -78,4 +78,10 @@ public class EpicService {
         epicRepository.deleteById(id);
         logger.info("Deleted epic with id: {}", id);
     }
+
+    public boolean isOwner(Integer epicId, String name) {
+        return epicRepository.findById(epicId)
+                .map(epic -> epic.getOwner().getName().equals(name))
+                .orElse(false);
+    }
 }
