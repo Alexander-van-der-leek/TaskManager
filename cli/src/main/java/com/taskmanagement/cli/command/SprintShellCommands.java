@@ -42,21 +42,29 @@ public class SprintShellCommands {
                 return;
             }
 
-            shellService.printSuccess("List of Sprints:");
+            List<String[]> tableData = new ArrayList<>();
+
             for (Map<String, Object> sprint : sprints) {
-                shellService.printInfo("ID: " + sprint.get("id"));
-                shellService.printInfo("Name: " + sprint.get("name"));
-                shellService.printInfo("Goal: " + sprint.get("goal"));
-                shellService.printInfo("Capacity Points: " + sprint.get("capacityPoints"));
-                shellService.printInfo("Start Date: " + sprint.get("startDate"));
-                shellService.printInfo("End Date: " + sprint.get("endDate"));
-                shellService.printInfo("Is_active " + sprint.get("active"));
-                shellService.printInfo("----------------------");
+                String[] row = new String[7]; // Updated to include "Is Active" column
+                row[0] = String.valueOf(sprint.get("id"));
+                row[1] = String.valueOf(sprint.get("name"));
+                row[2] = String.valueOf(sprint.get("goal"));
+                row[3] = String.valueOf(sprint.get("capacityPoints"));
+                row[4] = String.valueOf(sprint.get("startDate"));
+                row[5] = String.valueOf(sprint.get("endDate"));
+                row[6] = String.valueOf(sprint.get("active")); // "Is Active" column
+
+                tableData.add(row);
             }
+
+            String[] headers = {"ID", "Name", "Goal", "Capacity", "Start Date", "End Date", "Is Active"};
+            shellService.printTable(headers, tableData.toArray(new String[0][]));
+
         } catch (Exception e) {
             shellService.printError("Error fetching sprint list: " + e.getMessage());
         }
     }
+
     @ShellMethod(key = "sprint-get-id", value = "Get details of a specific sprint by ID")
     @ShellMethodAvailability("isUserLoggedIn")
     public void getSprintById() {
@@ -85,20 +93,25 @@ public class SprintShellCommands {
                 return;
             }
 
-            // Print sprint details
-            shellService.printSuccess("Sprint details:");
-            shellService.printInfo("ID: " + sprint.get("id"));
-            shellService.printInfo("Name: " + sprint.get("name"));
-            shellService.printInfo("Goal: " + sprint.get("goal"));
-            shellService.printInfo("Capacity Points: " + sprint.get("capacityPoints"));
-            shellService.printInfo("Start Date: " + sprint.get("startDate"));
-            shellService.printInfo("End Date: " + sprint.get("endDate"));
-            shellService.printInfo("Is_active: " + sprint.get("active"));
-            shellService.printInfo("----------------------");
+            // Display sprint details in a structured table
+            String[] headers = {"ID", "Name", "Goal", "Capacity", "Start Date", "End Date", "Is Active"};
+            String[] row = {
+                    String.valueOf(sprint.get("id")),
+                    String.valueOf(sprint.get("name")),
+                    String.valueOf(sprint.get("goal")),
+                    String.valueOf(sprint.get("capacityPoints")),
+                    String.valueOf(sprint.get("startDate")),
+                    String.valueOf(sprint.get("endDate")),
+                    String.valueOf(sprint.get("active"))
+            };
+
+            shellService.printTable(headers, new String[][]{row});
+
         } catch (Exception e) {
             shellService.printError("Error fetching sprint details: " + e.getMessage());
         }
     }
+
 
     @ShellMethod(key = "sprint-start", value = "Start a sprint")
     @ShellMethodAvailability("isUserLoggedIn")
@@ -140,7 +153,7 @@ public class SprintShellCommands {
         }
 
         Scanner scanner = new Scanner(System.in);
-        shellService.printInfo("Enter the Sprint ID to start:");
+        shellService.printInfo("Enter the Sprint ID to end:");
 
         int sprintId;
         try {
@@ -157,9 +170,10 @@ public class SprintShellCommands {
             shellService.printSuccess("Sprint with ID " + sprintId + " has been ended successfully!");
 
         } catch (Exception e) {
-            shellService.printError("Error starting sprint: " + e.getMessage());
+            shellService.printError("Error ending sprint: " + e.getMessage());
         }
     }
+
 
     @ShellMethod(key = "sprint-edit", value = "Edit a sprint's details")
     @ShellMethodAvailability("isUserLoggedIn")
@@ -181,23 +195,28 @@ public class SprintShellCommands {
         }
 
         try {
-            Map<String, Object> sprintStatus = apiService.get("/sprints/" + sprintId, Map.class);
-            if (sprintStatus == null || sprintStatus.isEmpty()) {
+            Map<String, Object> sprintEdit = apiService.get("/sprints/" + sprintId, Map.class);
+            if (sprintEdit == null || sprintEdit.isEmpty()) {
                 shellService.printError("Sprint not found.");
                 return;
             }
 
-            shellService.printSuccess("Sprint details:");
-            shellService.printInfo("ID: " + sprintStatus.get("id"));
-            shellService.printInfo("Name: " + sprintStatus.get("name"));
-            shellService.printInfo("Goal: " + sprintStatus.get("goal"));
-            shellService.printInfo("Capacity Points: " + sprintStatus.get("capacityPoints"));
-            shellService.printInfo("Start Date: " + sprintStatus.get("startDate"));
-            shellService.printInfo("End Date: " + sprintStatus.get("endDate"));
-            shellService.printInfo("Is Active: " + sprintStatus.get("active"));
-            shellService.printInfo("----------------------");
+            // Display sprint details in a table format
+            String[] headers = {"ID", "Name", "Goal", "Capacity", "Start Date", "End Date", "Is Active"};
+            String[] row = {
+                    String.valueOf(sprintEdit.get("id")),
+                    String.valueOf(sprintEdit.get("name")),
+                    String.valueOf(sprintEdit.get("goal")),
+                    String.valueOf(sprintEdit.get("capacityPoints")),
+                    String.valueOf(sprintEdit.get("startDate")),
+                    String.valueOf(sprintEdit.get("endDate")),
+                    String.valueOf(sprintEdit.get("active"))
+            };
 
-            shellService.printInfo("Which fields would you like to edit? (comma-separated list of fields like: name, goal, capacityPoints, startDate, endDate):");
+            shellService.printTable(headers, new String[][]{row});
+
+            // Prompt user for editing fields
+            shellService.printInfo("Which fields would you like to edit? (comma-separated list: name, goal, capacityPoints, startDate, endDate):");
             String fieldsToEditInput = scanner.nextLine().trim().toLowerCase();
 
             String[] fieldsToEdit = fieldsToEditInput.split("\\s*,\\s*");
@@ -212,9 +231,10 @@ public class SprintShellCommands {
             for (String field : fieldsToEdit) {
                 shellService.printInfo("Enter the new value for " + field + ":");
                 String newValue = scanner.nextLine().trim();
-                sprintStatus.put(field, newValue);
+                sprintEdit.put(field, newValue);
             }
-            apiService.put("/sprints/" + sprintId, sprintStatus, Void.class);
+
+            apiService.put("/sprints/" + sprintId, sprintEdit, Void.class);
             shellService.printSuccess("Sprint with ID " + sprintId + " has been updated successfully!");
 
         } catch (Exception e) {
