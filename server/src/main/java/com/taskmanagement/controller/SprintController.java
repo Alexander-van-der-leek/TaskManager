@@ -3,6 +3,7 @@ package com.taskmanagement.controller;
 import com.taskmanagement.dto.SprintDTO;
 import com.taskmanagement.service.SprintService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +20,7 @@ public class SprintController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('SCRUM_MASTER')")
     public ResponseEntity<SprintDTO> createSprint(@RequestBody SprintDTO sprintDTO) {
         SprintDTO createdSprint = sprintService.createSprint(sprintDTO);
         return ResponseEntity.ok(createdSprint);
@@ -42,9 +44,15 @@ public class SprintController {
         return ResponseEntity.ok(updatedSprint);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteSprint(@PathVariable Integer id) {
-        sprintService.deleteSprint(id);
-        return ResponseEntity.noContent().build();
+    @PostMapping("/{sprintId}/start")
+    public ResponseEntity<SprintDTO> startSprint(@PathVariable Integer sprintId) {
+        SprintDTO sprintDTO = sprintService.startSprint(sprintId);
+        return ResponseEntity.ok(sprintDTO);
+    }
+
+    @PostMapping("/{sprintId}/end")
+    public ResponseEntity<SprintDTO> endSprint(@PathVariable Integer sprintId) {
+        SprintDTO sprintDTO = sprintService.endSprint(sprintId);
+        return ResponseEntity.ok(sprintDTO);
     }
 }
