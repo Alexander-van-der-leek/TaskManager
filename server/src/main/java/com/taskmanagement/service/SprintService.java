@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 
         public SprintDTO createSprint(SprintDTO sprintDTO) {
             Sprint sprint = new Sprint();
+
             sprint.setName(sprintDTO.getName());
             sprint.setGoal(sprintDTO.getGoal());
             sprint.setCapacityPoints(sprintDTO.getCapacityPoints());
@@ -81,6 +82,31 @@ import java.util.stream.Collectors;
                 throw new SprintNotFoundException(id);
             }
             sprintRepository.deleteById(id);
+        }
+        public SprintDTO startSprint(Integer sprintId) {
+            Sprint sprint = sprintRepository.findById(sprintId)
+                    .orElseThrow(() -> new SprintNotFoundException(sprintId));
+
+            // Start the sprint: Set active and start date
+            sprint.setActive(true);
+            sprint.setStartDate(ZonedDateTime.now());
+            sprint.setUpdatedAt(ZonedDateTime.now());
+
+            Sprint updatedSprint = sprintRepository.save(sprint);
+            return mapToDTO(updatedSprint);
+        }
+
+        public SprintDTO endSprint(Integer sprintId) {
+            Sprint sprint = sprintRepository.findById(sprintId)
+                    .orElseThrow(() -> new SprintNotFoundException(sprintId));
+
+            // End the sprint: Set inactive and end date
+            sprint.setActive(false);
+            sprint.setEndDate(ZonedDateTime.now());
+            sprint.setUpdatedAt(ZonedDateTime.now());
+
+            Sprint updatedSprint = sprintRepository.save(sprint);
+            return mapToDTO(updatedSprint);
         }
 
         private SprintDTO mapToDTO(Sprint sprint) {

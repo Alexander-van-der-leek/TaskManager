@@ -1,16 +1,18 @@
 package com.taskmanagement.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
+
 import java.time.ZonedDateTime;
 
 import java.util.UUID;
-
+@Data
 @Entity
 @Table(name = "roles")
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private int id;
 
     @Column(nullable = false, unique = true)
     private String name;
@@ -32,45 +34,5 @@ public class Role {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = ZonedDateTime.now();
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public ZonedDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(ZonedDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public ZonedDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(ZonedDateTime updatedAt) {
-        this.updatedAt = updatedAt;
     }
 }
