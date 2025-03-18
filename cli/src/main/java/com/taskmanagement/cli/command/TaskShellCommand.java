@@ -52,8 +52,8 @@ public class TaskShellCommand {
             @ShellOption(value = {"-t", "--title"}, help = "Task title") String title,
             @ShellOption(value = {"-d", "--desc"}, help = "Task description") String description,
             @ShellOption(value = {"-a", "--assignee"}, help = "Assignee name") String assigneeName,
-            @ShellOption(value = {"-s", "--status"}, help = "Status ID") String statusName,
-            @ShellOption(value = {"-p", "--priority"}, help = "Priority ID") String priorityName,
+            @ShellOption(value = {"-s", "--status"}, help = "Status name") String statusName,
+            @ShellOption(value = {"-p", "--priority"}, help = "Priority name") String priorityName,
             @ShellOption(value = {"-due", "--due-date"}, help = "Due date (YYYY-MM-DD)") String dueDate,
             @ShellOption(value = {"-e", "--epic"}, help = "Epic ID", defaultValue = ShellOption.NULL) Integer epicId,
             @ShellOption(value = {"-sp", "--sprint"}, help = "Sprint ID", defaultValue = ShellOption.NULL) Integer sprintId,
@@ -158,8 +158,8 @@ public class TaskShellCommand {
             @ShellOption(value = {"-t", "--title"}, help = "Task title", defaultValue = ShellOption.NULL) String title,
             @ShellOption(value = {"-d", "--desc"}, help = "Task description", defaultValue = ShellOption.NULL) String description,
             @ShellOption(value = {"-a", "--assignee"}, help = "Assignee name", defaultValue = ShellOption.NULL) String assigneeName,
-            @ShellOption(value = {"-s", "--status"}, help = "Status ID", defaultValue = ShellOption.NULL) String statusName,
-            @ShellOption(value = {"-p", "--priority"}, help = "Priority ID", defaultValue = ShellOption.NULL) String priorityName,
+            @ShellOption(value = {"-s", "--status"}, help = "Status name", defaultValue = ShellOption.NULL) String statusName,
+            @ShellOption(value = {"-p", "--priority"}, help = "Priority name", defaultValue = ShellOption.NULL) String priorityName,
             @ShellOption(value = {"-due", "--due-date"}, help = "Due date (YYYY-MM-DD)", defaultValue = ShellOption.NULL) String dueDate,
             @ShellOption(value = {"-e", "--epic"}, help = "Epic ID", defaultValue = ShellOption.NULL) Integer epicId,
             @ShellOption(value = {"-sp", "--sprint"}, help = "Sprint ID", defaultValue = ShellOption.NULL) Integer sprintId,
@@ -364,8 +364,8 @@ public class TaskShellCommand {
     public void filterTasks(
             @ShellOption(value = {"-a", "--assignee"}, help = "Assignee name", defaultValue = ShellOption.NULL) String assigneeName,
             @ShellOption(value = {"-s", "--status"}, help = "Status ID", defaultValue = ShellOption.NULL) String statusName,
-            @ShellOption(value = {"-p", "--priority"}, help = "Priority ID", defaultValue = ShellOption.NULL) String priorityName,
-            @ShellOption(value = {"-sp", "--sprint"}, help = "Sprint ID", defaultValue = ShellOption.NULL) Integer sprintId,
+            @ShellOption(value = {"-p", "--priority"}, help = "Priority name", defaultValue = ShellOption.NULL) String priorityName,
+            @ShellOption(value = {"-sp", "--sprint"}, help = "Sprint name", defaultValue = ShellOption.NULL) Integer sprintId,
             @ShellOption(value = {"-e", "--epic"}, help = "Epic ID", defaultValue = ShellOption.NULL) Integer epicId
     ) {
         try {
@@ -682,7 +682,7 @@ public class TaskShellCommand {
 
         if (matchingStatuses.size() > 1) {
             shellService.printWarning("Multiple statuses found matching: " + statusName);
-            shellService.printInfo("Please be more specific or use the status ID. Available statuses:");
+            shellService.printInfo("Please be more specific. Available statuses:");
             listStatuses();
             throw new IllegalArgumentException("Ambiguous status name: " + statusName);
         }
@@ -717,7 +717,7 @@ public class TaskShellCommand {
 
         if (matchingPriorities.size() > 1) {
             shellService.printWarning("Multiple priorities found matching: " + priorityName);
-            shellService.printInfo("Please be more specific or use the priority ID. Available priorities:");
+            shellService.printInfo("Please be more specific. Available priorities:");
             listPriorities();
             throw new IllegalArgumentException("Ambiguous priority name: " + priorityName);
         }
