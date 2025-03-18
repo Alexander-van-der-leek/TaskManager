@@ -16,12 +16,10 @@ public class TaskManagementCLI {
     private WelcomeCommand welcomeCommand;
 
     public static void main(String[] args) {
-        // Important: Set these properties before anything else
         System.setProperty("spring.shell.interactive.enabled", "true");
         System.setProperty("org.jline.terminal.dumb", "false");
         System.setProperty("jansi.passthrough", "true");
 
-        // Install Jansi for better terminal color handling
         try {
             AnsiConsole.systemInstall();
 
@@ -29,14 +27,12 @@ public class TaskManagementCLI {
             app.setBannerMode(Banner.Mode.OFF); // We have our own banner
             app.run(args);
         } finally {
-            // Make sure to uninstall when done
             AnsiConsole.systemUninstall();
         }
     }
 
     @EventListener(ApplicationStartedEvent.class)
     public void onApplicationStarted() {
-        // Display welcome banner after application is fully started
         welcomeCommand.welcome();
     }
 }

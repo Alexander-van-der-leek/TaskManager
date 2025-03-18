@@ -91,7 +91,6 @@ public class UserController {
         }
     }
 
-//     Helper method to check if the user has either ROLE_ADMIN or ROLE_SUPER_ADMIN role.
     private boolean hasRequiredRole(UserDetails userDetails) {
         return userDetails.getAuthorities().stream()
                 .anyMatch(authority -> "ADMIN".equals(authority.getAuthority()));

@@ -90,7 +90,6 @@ public class UserSession {
         try (FileOutputStream out = new FileOutputStream(sessionFile)) {
             properties.store(out, "Task Management CLI Session");
 
-            // Set file permissions to be readable only by the user
             try {
                 Path path = sessionFile.toPath();
                 if (isPosixCompliant()) {

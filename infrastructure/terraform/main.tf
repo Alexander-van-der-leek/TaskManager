@@ -149,13 +149,13 @@ resource "aws_lb_target_group" "app_tg" {
 
   health_check {
     enabled             = true
-    path                = "/api/tasks"  # Use a path your application responds to
+    path                = "/api/tasks"
     port                = "traffic-port"
     healthy_threshold   = 2
     unhealthy_threshold = 5
     timeout             = 10
     interval            = 30
-    matcher             = "200-499"  # Accept a wider range of response codes
+    matcher             = "200-499"
   }
 
 }
