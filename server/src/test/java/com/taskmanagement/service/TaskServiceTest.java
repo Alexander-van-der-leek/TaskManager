@@ -93,12 +93,14 @@ public class TaskServiceTest {
         user.setName("Test User");
         user.setEmail("user@example.com");
         user.setRole(adminRole);
+        user.setIsActive(true);
 
         assignee = new User();
         assignee.setId(assigneeId);
         assignee.setName("Test Assignee");
         assignee.setEmail("assignee@example.com");
         assignee.setRole(devRole);
+        assignee.setIsActive(true);
 
         status = new TaskStatus();
         status.setId(statusId);
@@ -330,6 +332,7 @@ public class TaskServiceTest {
         newAssignee.setId(newAssigneeId);
         newAssignee.setName("New Assignee");
         newAssignee.setRole(devRole);
+        newAssignee.setIsActive(true);
 
         when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
@@ -554,5 +557,114 @@ public class TaskServiceTest {
         assertEquals(1, results.size());
         assertEquals(taskId, results.get(0).getId());
         verify(taskRepository, times(1)).findUserActiveTasks(userId);
+    }
+
+    @Test
+    void addTaskToSprint_ShouldThrowException_WhenTaskDueDateAfterSprintEndDate() {
+        Sprint sprint = new Sprint();
+        sprint.setId(sprintId);
+        sprint.setName("Test Sprint");
+        sprint.setScrumMaster(user);
+        sprint.setActive(true);
+        sprint.setStartDate(ZonedDateTime.now().minusDays(10));
+        sprint.setEndDate(ZonedDateTime.now().plusDays(20));
+        sprint.setCapacityPoints(100);
+
+        Task taskWithLateDueDate = new Task();
+        taskWithLateDueDate.setId(taskId);
+        taskWithLateDueDate.setTitle("Late Task");
+        taskWithLateDueDate.setCreatedBy(user);
+        taskWithLateDueDate.setAssignedTo(assignee);
+        taskWithLateDueDate.setStatus(status);
+        taskWithLateDueDate.setPriority(priority);
+        taskWithLateDueDate.setDueDate(ZonedDateTime.now().plusDays(30)); // After sprint end
+
+        when(taskRepository.findById(taskId)).thenReturn(Optional.of(taskWithLateDueDate));
+        when(sprintRepository.findById(sprintId)).thenReturn(Optional.of(sprint));
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            taskService.addTaskToSprint(taskId, sprintId, userId);
+        });
+
+        assertTrue(exception.getMessage().contains("Task due date"));
+        assertTrue(exception.getMessage().contains("is after sprint end date"));
+    }
+
+    @Test
+    void addTaskToSprint_ShouldThrowException_WhenSprintIsCompleted() {
+        Sprint completedSprint = new Sprint();
+        completedSprint.setId(sprintId);
+        completedSprint.setName("Completed Sprint");
+        completedSprint.setScrumMaster(user);
+        completedSprint.setActive(false);
+        completedSprint.setStartDate(ZonedDateTime.now().minusDays(30));
+        completedSprint.setEndDate(ZonedDateTime.now().minusDays(10)); // Already ended
+        completedSprint.setCapacityPoints(100);
+
+        when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
+        when(sprintRepository.findById(sprintId)).thenReturn(Optional.of(completedSprint));
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            taskService.addTaskToSprint(taskId, sprintId, userId);
+        });
+
+        assertTrue(exception.getMessage().contains("inactive sprint"),
+                "Error message should indicate sprint is inactive");
+    }
+
+    @Test
+    void addTaskToEpic_ShouldThrowException_WhenTaskDueDateAfterEpicEndDate() {
+        Epic epicWithEndDate = new Epic();
+        epicWithEndDate.setId(epicId);
+        epicWithEndDate.setName("Test Epic");
+        epicWithEndDate.setOwner(user);
+        epicWithEndDate.setStoryPoints(100);
+        epicWithEndDate.setStartDate(ZonedDateTime.now().minusDays(10));
+        epicWithEndDate.setTargetEndDate(ZonedDateTime.now().plusDays(20));
+
+        Task taskWithLateDueDate = new Task();
+        taskWithLateDueDate.setId(taskId);
+        taskWithLateDueDate.setTitle("Late Task");
+        taskWithLateDueDate.setCreatedBy(user);
+        taskWithLateDueDate.setAssignedTo(assignee);
+        taskWithLateDueDate.setStatus(status);
+        taskWithLateDueDate.setPriority(priority);
+        taskWithLateDueDate.setDueDate(ZonedDateTime.now().plusDays(30)); // After epic end
+
+        when(taskRepository.findById(taskId)).thenReturn(Optional.of(taskWithLateDueDate));
+        when(epicRepository.findById(epicId)).thenReturn(Optional.of(epicWithEndDate));
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            taskService.addTaskToEpic(taskId, epicId, userId);
+        });
+
+        assertTrue(exception.getMessage().contains("Task due date"));
+        assertTrue(exception.getMessage().contains("is after epic target end date"));
+    }
+
+    @Test
+    void addTaskToEpic_ShouldThrowException_WhenEpicIsCompleted() {
+        Epic completedEpic = new Epic();
+        completedEpic.setId(epicId);
+        completedEpic.setName("Completed Epic");
+        completedEpic.setOwner(user);
+        completedEpic.setStoryPoints(100);
+        completedEpic.setStartDate(ZonedDateTime.now().minusDays(60));
+        completedEpic.setTargetEndDate(ZonedDateTime.now().minusDays(10));
+        completedEpic.setActualEndDate(ZonedDateTime.now().minusDays(5)); // Already completed
+
+        when(taskRepository.findByEpicId(epicId)).thenReturn(Collections.emptyList());
+
+        when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
+        when(epicRepository.findById(epicId)).thenReturn(Optional.of(completedEpic));
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            taskService.addTaskToEpic(taskId, epicId, userId);
+        });
+
+        assertTrue(
+                exception.getMessage().toLowerCase().contains("epic"),
+                "Error message should indicate the epic is completed"
+        );
     }
 }

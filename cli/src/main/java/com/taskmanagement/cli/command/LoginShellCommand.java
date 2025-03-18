@@ -41,7 +41,6 @@ public class LoginShellCommand {
                 Scanner scanner = new Scanner(System.in);
                 idToken = scanner.nextLine().trim();
             } else {
-                // Generate auth URL and open in browser
                 URI authUrl = oAuthService.getAuthorizationUrl();
 
                 if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
@@ -52,7 +51,6 @@ public class LoginShellCommand {
                     shellService.printInfo(authUrl.toString());
                 }
 
-                // Start local server to receive the auth callback
                 shellService.printInfo("Waiting for authentication...");
                 idToken = oAuthService.waitForAuthorizationCode();
 
@@ -62,7 +60,6 @@ public class LoginShellCommand {
                 }
             }
 
-            // Exchange Google ID token for application JWT token
             shellService.printInfo("Authenticating with server...");
 
             try {
@@ -72,7 +69,6 @@ public class LoginShellCommand {
                 String name = (String) response.get("name");
                 String email = (String) response.get("email");
 
-                // Save token to session
                 userSession.setToken(token);
                 userSession.setUserName(name);
                 userSession.setUserEmail(email);
@@ -87,7 +83,7 @@ public class LoginShellCommand {
         }
     }
 
-    @ShellMethod(key = "signout", value = "Sign out and clear session")
+    @ShellMethod(key = "logout", value = "Log out and clear session")
     public void signout() {
         if (userSession.isAuthenticated()) {
             String name = userSession.getUserName();
