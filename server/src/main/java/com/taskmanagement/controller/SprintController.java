@@ -44,9 +44,15 @@ public class SprintController {
         return ResponseEntity.ok(updatedSprint);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteSprint(@PathVariable Integer id) {
-        sprintService.deleteSprint(id);
-        return ResponseEntity.noContent().build();
+    @PostMapping("/{sprintId}/start")
+    public ResponseEntity<SprintDTO> startSprint(@PathVariable Integer sprintId) {
+        SprintDTO sprintDTO = sprintService.startSprint(sprintId);
+        return ResponseEntity.ok(sprintDTO);
+    }
+
+    @PostMapping("/{sprintId}/end")
+    public ResponseEntity<SprintDTO> endSprint(@PathVariable Integer sprintId) {
+        SprintDTO sprintDTO = sprintService.endSprint(sprintId);
+        return ResponseEntity.ok(sprintDTO);
     }
 }
