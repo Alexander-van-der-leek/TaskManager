@@ -95,7 +95,6 @@ public class TaskCommentControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "550e8400-e29b-41d4-a716-446655440000", roles = {"ADMIN"})
     void getCommentsByTaskId_ShouldReturnComments() throws Exception {
         when(commentService.getCommentsByTaskId(taskId, userId)).thenReturn(Arrays.asList(commentDTO));
 
@@ -108,7 +107,6 @@ public class TaskCommentControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "550e8400-e29b-41d4-a716-446655440000", roles = {"ADMIN"})
     void addComment_ShouldCreateComment() throws Exception {
         TaskCommentDTO inputDTO = new TaskCommentDTO();
         inputDTO.setTaskId(taskId);
@@ -127,7 +125,6 @@ public class TaskCommentControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "550e8400-e29b-41d4-a716-446655440000", roles = {"ADMIN"})
     void updateComment_ShouldUpdateComment() throws Exception {
         TaskCommentDTO inputDTO = new TaskCommentDTO();
         inputDTO.setContent("Updated Comment");
@@ -154,7 +151,6 @@ public class TaskCommentControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "550e8400-e29b-41d4-a716-446655440000", roles = {"ADMIN"})
     void deleteComment_ShouldDeleteComment() throws Exception {
         mockMvc.perform(delete("/api/comments/" + commentId)
                         .with(SecurityMockMvcRequestPostProcessors.user(userDetails))
