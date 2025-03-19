@@ -61,7 +61,7 @@ public class EpicService {
         return epicRepository.findById(id).map(epic -> {
             epic.setName(epicDTO.getName());
             epic.setDescription(epicDTO.getDescription());
-            epic.setStoryPoints(epicDTO.getStoryPoints() != null ? epicDTO.getStoryPoints() : 0); // Default to 0 if null
+            epic.setStoryPoints(epicDTO.getStoryPoints() != null ? epicDTO.getStoryPoints() : 0);
             epic.setStartDate(epicDTO.getStartDate() != null ? epicDTO.getStartDate() : ZonedDateTime.now());
             epic.setTargetEndDate(epicDTO.getTargetEndDate());
             epic.setUpdatedAt(ZonedDateTime.now());
