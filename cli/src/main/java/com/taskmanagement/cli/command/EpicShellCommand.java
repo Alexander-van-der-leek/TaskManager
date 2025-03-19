@@ -57,7 +57,7 @@ public class EpicShellCommand {
                 shellService.printTable(headers, tableData.toArray(new String[0][]));
             }
         } catch (Exception e) {
-            shellService.printError("Error fetching epics: " + e.getMessage());
+            shellService.printError("Error fetching epics");
         }
     }
 
@@ -107,7 +107,7 @@ public class EpicShellCommand {
             shellService.printInfo("ID: " + epicResult.get("id"));
             shellService.printInfo("Name: " + epicResult.get("name"));
         } catch (Exception e) {
-            shellService.printError("Error creating epic: " + e.getMessage());
+            shellService.printError("Error creating epic");
         }
     }
 
@@ -129,7 +129,7 @@ public class EpicShellCommand {
             shellService.printInfo("Start Date: " + epic.get("startDate"));
             shellService.printInfo("Target End Date: " + epic.get("targetEndDate"));
         } catch (Exception e) {
-            shellService.printError("Error fetching epic: " + e.getMessage());
+            shellService.printError("Error fetching epic");
         }
     }
 
@@ -167,7 +167,7 @@ public class EpicShellCommand {
             shellService.printSuccess("Epic updated successfully!");
 
         } catch (Exception e) {
-            shellService.printError("Error updating epic: " + e.getMessage());
+            shellService.printError("Error updating epic");
         }
     }
 
@@ -199,7 +199,7 @@ public class EpicShellCommand {
             shellService.printSuccess("Epic deleted successfully!");
 
         } catch (Exception e) {
-            shellService.printError("Error deleting epic: " + e.getMessage());
+            shellService.printError("Error deleting epic");
         }
     }
 
