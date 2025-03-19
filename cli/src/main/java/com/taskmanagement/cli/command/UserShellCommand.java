@@ -92,13 +92,11 @@ public class UserShellCommand {
                 shellService.printError("You cannot update an inactive user.");
                 return;
             }
-            shellService.printHeading("Searching for user by name: " + name);
 
             List<String> roleNames = fetchAvailableRoles();
             shellService.printHeading("Available roles:");
             roleNames.forEach(shellService::printInfo);
 
-            shellService.printHeading("Searching for user by name: " + name);
 
             Scanner scanner = new Scanner(System.in);
 
@@ -111,7 +109,6 @@ public class UserShellCommand {
                 return;
             }
 
-            shellService.printHeading("Searching for user by name: " + name);
 
             Map<String, Object> userUpdateData = createUpdateData(userId, roleId);
             apiService.put("/users/" + userId, userUpdateData, Object.class);
