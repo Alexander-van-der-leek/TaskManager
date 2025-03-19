@@ -61,7 +61,7 @@ public class SprintShellCommands {
             shellService.printTable(headers, tableData.toArray(new String[0][]));
 
         } catch (Exception e) {
-            shellService.printError("Error could not fetch the sprint list: ");
+            shellService.printError("Error could not fetch the sprint list: " + e.getMessage());
         }
     }
 
@@ -161,7 +161,7 @@ public class SprintShellCommands {
             apiService.put("/sprints/" + sprintId, sprintStatus, Void.class);
             shellService.printSuccess("Sprint with ID " + sprintId + " has been started successfully!");
         } catch (Exception e) {
-            shellService.printError("Error could not start the sprint");
+            shellService.printError("Error could not start the sprint: " + e.getMessage());
         }
     }
 
@@ -216,7 +216,7 @@ public class SprintShellCommands {
             apiService.put("/sprints/" + sprintId, sprintStatus, Void.class);
             shellService.printSuccess("Sprint with ID " + sprintId + " has been ended successfully!");
         } catch (Exception e) {
-            shellService.printError("Error could not end the sprint");
+            shellService.printError("Error could not end the sprint: " + e.getMessage());
         }
     }
 
@@ -281,7 +281,7 @@ public class SprintShellCommands {
             shellService.printSuccess("Sprint with ID " + sprintId + " has been updated successfully!");
 
         } catch (Exception e) {
-            shellService.printError("Error could not edit the sprint");
+            shellService.printError("Error could not edit sprint: " + e.getMessage());
         }
     }
     @ShellMethod(key = "sprint-owner", value = "Find the owner/scrum master of a sprint")
@@ -291,6 +291,7 @@ public class SprintShellCommands {
             shellService.printError("You need to log in before fetching the sprint owner.");
             return;
         }
+
         Scanner scanner = new Scanner(System.in);
         shellService.printInfo("Enter the Sprint ID to find the owner or scrum master:");
 
@@ -309,23 +310,32 @@ public class SprintShellCommands {
                 shellService.printError("Sprint with ID " + sprintId + " not found.");
                 return;
             }
+
             Object ownerId = sprintStatus.get("scrumMasterId");
-            if (ownerId == null) {
+            if (ownerId == null || ownerId.toString().trim().isEmpty()) {
                 shellService.printError("No owner or scrum master found for Sprint ID " + sprintId);
                 return;
             }
-            Map<String, Object> user = apiService.get("/users/search" + ownerId, Map.class);
-            if (user == null) {
+
+            Map<String, Object> user = apiService.get("/users/" + ownerId, Map.class);
+            if (user == null || user.isEmpty()) {
                 shellService.printError("Error retrieving user details for owner/scrum master.");
                 return;
             }
+
             String userName = (String) user.get("name");
-            shellService.printSuccess("Owner/Scrum Master of Sprint ID " + sprintId + ": " + userName);
+            if (userName == null) {
+                shellService.printError("Scrum Master found, but name is missing.");
+                return;
+            }
+
+            shellService.printSuccess("Owner/Scrum Master of Sprint ID " + sprintId + " is " + userName);
 
         } catch (Exception e) {
-            shellService.printError("Error could not find the sprint owner");
+            shellService.printError("Error finding sprint owner: " + e.getMessage());
         }
     }
+
 
     @ShellMethod(key = "sprint-create", value = "Create a new sprint")
     @ShellMethodAvailability("isUserLoggedIn")
@@ -415,7 +425,7 @@ public class SprintShellCommands {
                 shellService.printError("Failed to create sprint. Response is null.");
             }
         } catch (Exception e) {
-            shellService.printError("Error could not create the sprint");
+            shellService.printError("Error could not create a sprint: " + e.getMessage());
         }
     }
 

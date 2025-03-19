@@ -52,6 +52,12 @@ import java.util.stream.Collectors;
             return mapToDTO(sprint);
         }
 
+        public SprintDTO findScumMasterName(User user) {
+            return sprintRepository.findByScrumMaster(user)
+                    .map(this::mapToDTO)
+                    .orElseThrow(RuntimeException::new);
+        }
+
         public List<SprintDTO> getAllSprints() {
             List<Sprint> sprints = sprintRepository.findAll();
             return sprints.stream().map(this::mapToDTO).collect(Collectors.toList());

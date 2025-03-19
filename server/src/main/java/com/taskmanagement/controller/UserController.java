@@ -36,6 +36,21 @@ public class UserController {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDTO> getUserById(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        UUID userId = UUID.fromString(userDetails.getUsername());
+        logger.info("User {} requested details for user ID: {}", userId, id);
+
+        UserDTO user = userService.getUserById(id);
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(user);
+    }
+
     @GetMapping("/search")
     public ResponseEntity<List<UserDTO>> searchUsersByName(
             @RequestParam String name,
@@ -44,6 +59,7 @@ public class UserController {
         logger.info("User {} searching users by name containing: {}", userId, name);
         return ResponseEntity.ok(userService.searchUsersByName(name));
     }
+
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -82,6 +98,8 @@ public class UserController {
                     .body("No user found with the ID: " + id);
         }
     }
+
+
 
     private boolean hasRequiredRole(UserDetails userDetails) {
         return userDetails.getAuthorities().stream()
