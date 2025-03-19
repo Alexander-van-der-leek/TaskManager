@@ -77,7 +77,7 @@ public class UserSession {
         this.userRole = userRole;
     }
 
-
+    // basically just save to user home . and make only owner accesible if possible
     public void saveToFile() {
         Properties properties = new Properties();
         properties.setProperty(TOKEN_KEY, token != null ? token : "");
@@ -144,6 +144,7 @@ public class UserSession {
         return new File(userHome, SESSION_FILE);
     }
 
+    // for e.g max ect.
     private boolean isPosixCompliant() {
         try {
             return Files.getFileAttributeView(Paths.get(System.getProperty("user.home")),

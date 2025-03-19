@@ -22,6 +22,7 @@ public class GoogleTokenVerifier {
 
     private final GoogleIdTokenVerifier verifier;
 
+    // verify our google tokens
     public GoogleTokenVerifier(@Value("${security.oauth2.google.client-id}") String clientId) {
         this.verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
                 .setAudience(Collections.singletonList(clientId))
@@ -29,6 +30,7 @@ public class GoogleTokenVerifier {
         logger.info("GoogleTokenVerifier initialized with client ID: {}", clientId);
     }
 
+    // return the user from Google
     public Optional<GoogleUserInfo> verify(String idTokenString) {
         try {
             GoogleIdToken idToken = verifier.verify(idTokenString);

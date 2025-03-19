@@ -41,8 +41,10 @@ public class LoginShellCommand {
                 Scanner scanner = new Scanner(System.in);
                 idToken = scanner.nextLine().trim();
             } else {
+                // setup auth
                 URI authUrl = oAuthService.getAuthorizationUrl();
 
+                // try auto open
                 if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
                     shellService.printInfo("Opening browser for authentication...");
                     Desktop.getDesktop().browse(authUrl);
@@ -52,6 +54,7 @@ public class LoginShellCommand {
                 }
 
                 shellService.printInfo("Waiting for authentication...");
+                // wait for auth success
                 idToken = oAuthService.waitForAuthorizationCode();
 
                 if (idToken == null) {
@@ -63,6 +66,7 @@ public class LoginShellCommand {
             shellService.printInfo("Authenticating with server...");
 
             try {
+                // try and auth that token on server
                 Map<String, Object> response = apiService.authenticate(idToken);
 
                 String token = (String) response.get("token");
