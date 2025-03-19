@@ -1,8 +1,10 @@
 package com.taskmanagement.controller;
 
 import com.taskmanagement.dto.EpicDTO;
+import org.slf4j.Logger;
 import com.taskmanagement.model.Epic;
 import com.taskmanagement.service.EpicService;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -10,11 +12,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+
 @RestController
 @RequestMapping("/api/epics")
 public class EpicController {
     // general epics controller
-
+    private static final Logger logger = LoggerFactory.getLogger(EpicController.class);
     private final EpicService epicService;
 
     public EpicController(EpicService epicService) {
