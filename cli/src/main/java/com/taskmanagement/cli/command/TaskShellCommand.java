@@ -583,6 +583,23 @@ public class TaskShellCommand {
         }
     }
 
+    @ShellMethod(key = "task-search", value = "Search for tasks by title")
+    @ShellMethodAvailability("isUserLoggedIn")
+    public void searchTasks(@ShellOption(help = "Title to search for") String title) {
+        try {
+            shellService.printHeading("Searching for tasks with title containing: " + title);
+
+            Object[] tasks = apiService.get("/tasks/search?title=" + title, Object[].class);
+            if (tasks.length == 0) {
+                shellService.printInfo("No tasks found matching the search term");
+            } else {
+                displayTasksTable(tasks);
+            }
+        } catch (Exception e) {
+            shellService.printError("Error searching tasks: " + e.getMessage());
+        }
+    }
+
     @ShellMethod(key = "priority-list", value = "List all available task priorities")
     @ShellMethodAvailability("isUserLoggedIn")
     public void listPriorities() {
