@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class EpicService {
@@ -77,6 +78,28 @@ public class EpicService {
         epicRepository.findById(id).orElseThrow(() -> new EpicNotFoundException("Epic not found with id: " + id));
         epicRepository.deleteById(id);
         logger.info("Deleted epic with id: {}", id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<EpicDTO> searchEpicsByName(String name) {
+        logger.debug("Searching epics with name containing: {}", name);
+
+        List<Epic> epics = epicRepository.findByNameContainingIgnoreCase(name);
+
+        return epics.stream()
+                .map(epic -> {
+                    EpicDTO dto = new EpicDTO();
+                    dto.setId(epic.getId());
+                    dto.setName(epic.getName());
+                    dto.setDescription(epic.getDescription());
+                    dto.setOwnerId(epic.getOwner().getId());
+                    dto.setOwnerName(epic.getOwner().getName());
+                    dto.setStoryPoints(epic.getStoryPoints());
+                    dto.setStartDate(epic.getStartDate());
+                    dto.setTargetEndDate(epic.getTargetEndDate());
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 
     public boolean isOwner(Integer epicId, String name) {

@@ -8,9 +8,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 
 @RestController
@@ -59,5 +62,14 @@ public class EpicController {
     public ResponseEntity<Void> deleteEpic(@PathVariable Integer id) {
         epicService.deleteEpic(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<EpicDTO>> searchEpicsByName(
+            @RequestParam String name,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        UUID userId = UUID.fromString(userDetails.getUsername());
+        logger.info("User {} searching epics by name containing: {}", userId, name);
+        return ResponseEntity.ok(epicService.searchEpicsByName(name));
     }
 }

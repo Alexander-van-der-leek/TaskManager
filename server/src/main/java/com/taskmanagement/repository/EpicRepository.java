@@ -5,6 +5,7 @@ import com.taskmanagement.model.Epic;
 import com.taskmanagement.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,5 +17,6 @@ public interface EpicRepository extends JpaRepository<Epic, Integer> {
     @Query("SELECT new com.taskmanagement.dto.EpicDTO(e.id, e.name, e.owner.name) FROM Epic e")
     List<EpicDTO> findAllWithOwner();
 
-    List<EpicDTO> findByNameContainingIgnoreCase(String name, Class<EpicDTO> epicDTOClass);
+    @Query("SELECT e FROM Epic e WHERE LOWER(e.name) LIKE LOWER(CONCAT('%', :name, '%'))")
+    List<Epic> findByNameContainingIgnoreCase(@Param("name") String name);
 }

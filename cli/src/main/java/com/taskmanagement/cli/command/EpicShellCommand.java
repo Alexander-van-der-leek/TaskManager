@@ -30,6 +30,37 @@ public class EpicShellCommand {
     @Autowired
     private ShellService shellService;
 
+    @ShellMethod(key = "epic-search", value = "Search for epics by name")
+    @ShellMethodAvailability("isUserLoggedIn")
+    public void searchEpics(@ShellOption(help = "Name to search for") String name) {
+        try {
+            shellService.printHeading("Searching for epics with name containing: " + name);
+
+            Object[] epics = apiService.get("/epics/search?name=" + name, Object[].class);
+            if (epics.length == 0) {
+                shellService.printInfo("No epics found matching the search term");
+            } else {
+                List<String[]> tableData = new ArrayList<>();
+                for (Object epicObj : epics) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> epic = (Map<String, Object>) epicObj;
+
+                    String[] row = new String[3];
+                    row[0] = String.valueOf(epic.get("id"));
+                    row[1] = String.valueOf(epic.get("name"));
+                    row[2] = String.valueOf(epic.get("ownerName"));
+
+                    tableData.add(row);
+                }
+
+                String[] headers = {"ID", "Name", "Owner Name"};
+                shellService.printTable(headers, tableData.toArray(new String[0][]));
+            }
+        } catch (Exception e) {
+            shellService.printError("Error searching epics: " + e.getMessage());
+        }
+    }
+
     @ShellMethod(key = "epic-list", value = "List all epics")
     @ShellMethodAvailability("isUserLoggedIn")
     public void listEpics() {
