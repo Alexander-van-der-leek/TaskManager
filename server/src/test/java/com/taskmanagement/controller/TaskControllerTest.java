@@ -99,7 +99,6 @@ public class TaskControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "550e8400-e29b-41d4-a716-446655440000", roles = {"ADMIN"})
     void getTasksByAssignee_ShouldReturnAssigneeTasks() throws Exception {
 
         UUID assigneeId = UUID.randomUUID();
@@ -114,7 +113,6 @@ public class TaskControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "550e8400-e29b-41d4-a716-446655440000", roles = {"ADMIN"})
     void getTasksByEpic_ShouldReturnEpicTasks() throws Exception {
         Integer epicId = rand.nextInt();
         when(taskService.getTasksByEpic(epicId, userId)).thenReturn(taskDTOList);
@@ -128,7 +126,6 @@ public class TaskControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "550e8400-e29b-41d4-a716-446655440000", roles = {"ADMIN"})
     void getTasksBySprint_ShouldReturnSprintTasks() throws Exception {
         Integer sprintId = rand.nextInt();
         when(taskService.getTasksBySprint(sprintId, userId)).thenReturn(taskDTOList);
@@ -142,7 +139,6 @@ public class TaskControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "550e8400-e29b-41d4-a716-446655440000", roles = {"ADMIN"})
     void getSprintStats_ShouldReturnSprintStats() throws Exception {
 
         Integer sprintId = rand.nextInt();
@@ -162,7 +158,6 @@ public class TaskControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "550e8400-e29b-41d4-a716-446655440000", roles = {"ADMIN"})
     void getOverdueTasks_ShouldReturnOverdueTasks() throws Exception {
 
         when(taskService.getOverdueTasks(userId)).thenReturn(taskDTOList);
@@ -176,7 +171,6 @@ public class TaskControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "550e8400-e29b-41d4-a716-446655440000", roles = {"ADMIN"})
     void getRecentlyUpdatedTasks_ShouldReturnRecentTasks() throws Exception {
 
         when(taskService.getRecentlyUpdatedTasks(eq(userId), eq(24))).thenReturn(taskDTOList);
@@ -190,7 +184,6 @@ public class TaskControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "550e8400-e29b-41d4-a716-446655440000", roles = {"ADMIN"})
     void changeTaskStatus_ShouldChangeStatus_WhenStatusExists() throws Exception {
 
         TaskDTO updatedTask = new TaskDTO();
@@ -210,7 +203,6 @@ public class TaskControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "550e8400-e29b-41d4-a716-446655440000", roles = {"ADMIN"})
     void assignTask_ShouldAssignTask_WhenUserExists() throws Exception {
 
         UUID assigneeId = UUID.randomUUID();
@@ -231,7 +223,6 @@ public class TaskControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "550e8400-e29b-41d4-a716-446655440000", roles = {"ADMIN"})
     void addTaskToSprint_ShouldAddTaskToSprint_WhenSprintExists() throws Exception {
 
         Integer sprintId = rand.nextInt();
@@ -252,7 +243,6 @@ public class TaskControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "550e8400-e29b-41d4-a716-446655440000", roles = {"ADMIN"})
     void removeTaskFromSprint_ShouldRemoveTaskFromSprint() throws Exception {
 
         TaskDTO updatedTask = new TaskDTO();
@@ -271,7 +261,6 @@ public class TaskControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "550e8400-e29b-41d4-a716-446655440000", roles = {"ADMIN"})
     void addTaskToEpic_ShouldAddTaskToEpic_WhenEpicExists() throws Exception {
 
         Integer epicId = rand.nextInt();
@@ -292,7 +281,6 @@ public class TaskControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "550e8400-e29b-41d4-a716-446655440000", roles = {"ADMIN"})
     void removeTaskFromEpic_ShouldRemoveTaskFromEpic() throws Exception {
 
         TaskDTO updatedTask = new TaskDTO();
@@ -311,7 +299,6 @@ public class TaskControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "550e8400-e29b-41d4-a716-446655440000", roles = {"ADMIN"})
     void deleteTask_ShouldDeleteTask_WhenTaskExists() throws Exception {
 
         Mockito.doNothing().when(taskService).deleteTask(1, userId);
@@ -323,7 +310,6 @@ public class TaskControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "550e8400-e29b-41d4-a716-446655440000", roles = {"ADMIN"})
     void getTasksByFilter_ShouldReturnFilteredTasks() throws Exception {
 
         TaskFilterDTO filterDTO = new TaskFilterDTO();
@@ -344,7 +330,6 @@ public class TaskControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "550e8400-e29b-41d4-a716-446655440000", roles = {"ADMIN"})
     void getMyTasks_ShouldReturnUserTasks() throws Exception {
 
         when(taskService.getUserActiveTasks(userId)).thenReturn(taskDTOList);
@@ -358,7 +343,6 @@ public class TaskControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "550e8400-e29b-41d4-a716-446655440000", roles = {"ADMIN"})
     void getAllTasks_ShouldReturnTasks() throws Exception {
 
         when(taskService.getAllTasks(userId)).thenReturn(taskDTOList);
@@ -372,7 +356,6 @@ public class TaskControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "550e8400-e29b-41d4-a716-446655440000", roles = {"ADMIN"})
     void getTaskById_ShouldReturnTask_WhenTaskExists() throws Exception {
 
         when(taskService.getTaskById(1, userId)).thenReturn(taskDTO);

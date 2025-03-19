@@ -63,7 +63,6 @@ public class APIService {
     }
 
     // Generic methods to use for all rest functionality, just generic return
-
     public <T> T get(String uri, Class<T> responseType) {
         try {
             return webClient.get()
