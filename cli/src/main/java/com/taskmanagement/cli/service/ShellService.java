@@ -4,6 +4,7 @@ import org.jline.terminal.Terminal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+// helpers for shell printing ect.
 @Service
 public class ShellService {
 

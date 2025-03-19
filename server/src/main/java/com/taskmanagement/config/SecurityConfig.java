@@ -25,6 +25,8 @@ import java.util.Date;
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    // sets up chain security filters that process http req
+
     private final JWTTokenProvider tokenProvider;
 
     public SecurityConfig(JWTTokenProvider tokenProvider) {
@@ -33,16 +35,17 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        // disable csrf since making use of jwt
         http
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll() // no auth for auth routes
                         .anyRequest().authenticated()
                 )
-                .exceptionHandling(ex -> ex
+                .exceptionHandling(ex -> ex  // setup auth errors e.g forbidden vs unauth
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(HttpStatus.UNAUTHORIZED.value());
                             response.setContentType(MediaType.APPLICATION_JSON_VALUE);

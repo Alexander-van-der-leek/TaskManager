@@ -9,5 +9,4 @@ import com.taskmanagement.model.TaskStatus;
 
 @Repository
 public interface TaskStatusRepository extends JpaRepository<TaskStatus, Integer> {
-    // Query methods will be implemented later
 }

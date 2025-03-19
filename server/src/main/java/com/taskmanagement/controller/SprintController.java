@@ -19,6 +19,7 @@ public class SprintController {
         this.sprintService = sprintService;
     }
 
+    // need scrum master to create sprints
     @PostMapping
     @PreAuthorize("hasRole('SCRUM_MASTER')")
     public ResponseEntity<SprintDTO> createSprint(@RequestBody SprintDTO sprintDTO) {

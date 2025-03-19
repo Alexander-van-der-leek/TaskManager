@@ -23,6 +23,7 @@ public class AuthController {
         this.authService = authService;
     }
 
+    // used auth user
     @PostMapping("/google")
     public ResponseEntity<?> authenticateWithGoogle(@RequestBody Map<String, String> request) {
         String idToken = request.get("idToken");
@@ -34,6 +35,7 @@ public class AuthController {
 
         logger.info("Processing Google authentication request");
 
+        // call on our auth service to auth token
         Optional<AuthResponseDTO> authResult = authService.authenticateWithGoogle(idToken);
 
         if (authResult.isPresent()) {
@@ -47,6 +49,7 @@ public class AuthController {
         }
     }
 
+    // post validation endpoint
     @GetMapping("/validate")
     public ResponseEntity<String> validateToken() {
         return ResponseEntity.ok("Token is valid");

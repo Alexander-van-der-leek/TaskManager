@@ -35,6 +35,7 @@ public class APIService {
         this.userSession = userSession;
     }
 
+    // authenticating user
     public Map<String, Object> authenticate(String idToken) {
         Map<String, String> requestBody = new HashMap<>();
         requestBody.put("idToken", idToken);
@@ -60,6 +61,8 @@ public class APIService {
             throw new RuntimeException("Failed to process server response: " + e.getMessage());
         }
     }
+
+    // Generic methods to use for all rest functionality, just generic return
 
     public <T> T get(String uri, Class<T> responseType) {
         try {
@@ -134,6 +137,7 @@ public class APIService {
         }
     }
 
+    // just add error handler
     private void handleApiError(WebClientResponseException ex) {
         try {
             Map<String, Object> errorResponse = objectMapper.readValue(
