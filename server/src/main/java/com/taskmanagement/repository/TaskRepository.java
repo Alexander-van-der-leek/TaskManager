@@ -34,4 +34,7 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
 
     @Query("SELECT COUNT(t) FROM Task t WHERE t.sprint.id = :sprintId AND t.status.id = :statusId")
     long countTasksBySprintAndStatus(@Param("sprintId") Integer sprintId, @Param("statusId") Integer statusId);
+
+    @Query("SELECT t FROM Task t WHERE LOWER(t.title) LIKE LOWER(CONCAT('%', :title, '%'))")
+    List<Task> findByTitleContainingIgnoreCase(@Param("title") String title);
 }

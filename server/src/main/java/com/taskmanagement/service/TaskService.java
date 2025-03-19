@@ -339,6 +339,14 @@ public class TaskService {
         return convertToDTO(updatedTask);
     }
 
+    @Transactional(readOnly = true)
+    public List<TaskDTO> searchTasksByTitle(String title, UUID userId) {
+        logger.debug("Searching for tasks with title containing: {}", title);
+        return taskRepository.findByTitleContainingIgnoreCase(title).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public TaskDTO changeTaskStatus(Integer taskId, Integer statusId, UUID userId) {
         logger.debug("Changing status of task: {} to status: {} by user: {}", taskId, statusId, userId);

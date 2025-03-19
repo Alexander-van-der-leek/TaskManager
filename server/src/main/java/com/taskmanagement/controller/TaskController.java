@@ -220,6 +220,15 @@ public class TaskController {
         return ResponseEntity.ok(taskService.getAllPriorities());
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<TaskDTO>> searchTasksByTitle(
+            @RequestParam String title,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        UUID userId = UUID.fromString(userDetails.getUsername());
+        logger.info("User {} searching tasks by title containing: {}", userId, title);
+        return ResponseEntity.ok(taskService.searchTasksByTitle(title, userId));
+    }
+
     @PatchMapping("/{id}/remove-epic")
     @PreAuthorize("hasRole('PRODUCT_OWNER') or hasRole('ADMIN')")
     public ResponseEntity<TaskDTO> removeEpicFromTask(
