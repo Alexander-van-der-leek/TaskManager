@@ -42,7 +42,7 @@ public class EpicController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Epic> getEpicById(@PathVariable Integer id) {
+    public ResponseEntity<EpicDTO> getEpicById(@PathVariable Integer id) {
         return epicService.getEpicById(id)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());

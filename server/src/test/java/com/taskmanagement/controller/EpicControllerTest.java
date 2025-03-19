@@ -83,19 +83,21 @@ class EpicControllerTest {
 
     @Test
     void getEpicById_whenEpicExists_shouldReturnEpic() {
-        when(epicService.getEpicById(epicId)).thenReturn(Optional.of(epic));
+        EpicDTO epicDTO = new EpicDTO(epic.getId(), epic.getName(), epic.getDescription(), epic.getOwner().getName());
 
-        ResponseEntity<Epic> response = epicController.getEpicById(epicId);
+        when(epicService.getEpicById(epicId)).thenReturn(Optional.of(epicDTO));
+
+        ResponseEntity<EpicDTO> response = epicController.getEpicById(epicId);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(epic, response.getBody());
+        assertEquals(epicDTO, response.getBody());
     }
 
     @Test
     void getEpicById_whenEpicDoesNotExist_shouldReturnNotFound() {
         when(epicService.getEpicById(epicId)).thenReturn(Optional.empty());
 
-        ResponseEntity<Epic> response = epicController.getEpicById(epicId);
+        ResponseEntity<EpicDTO> response = epicController.getEpicById(epicId);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNull(response.getBody());
