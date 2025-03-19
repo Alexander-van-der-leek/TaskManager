@@ -314,7 +314,7 @@ public class SprintShellCommands {
                 shellService.printError("No owner or scrum master found for Sprint ID " + sprintId);
                 return;
             }
-            Map<String, Object> user = apiService.get("/users/" + ownerId, Map.class);
+            Map<String, Object> user = apiService.get("/users/search" + ownerId, Map.class);
             if (user == null) {
                 shellService.printError("Error retrieving user details for owner/scrum master.");
                 return;
@@ -341,7 +341,7 @@ public class SprintShellCommands {
 
         UUID scrumMasterId = null;
 
-        if ("SCRUM_MASTER".equalsIgnoreCase(loggedInUserRole) || "ADMIN".equalsIgnoreCase(loggedInUserRole)) {
+        if ("SCRUM_MASTER".equalsIgnoreCase(loggedInUserRole)){
             scrumMasterId = UUID.fromString(loggedInUserId);
             shellService.printInfo("You are a Scrum Master, and your ID will be used for the Scrum Master.");
         } else {
@@ -371,9 +371,7 @@ public class SprintShellCommands {
                 shellService.printError("Error could not fetch the Scrum Master's ID");
                 return;
             }
-
-    }
-
+        }
         shellService.printInfo("Enter sprint name:");
         String name = scanner.nextLine().trim();
 
@@ -399,7 +397,6 @@ public class SprintShellCommands {
             return;
         }
 
-        // Prepare the sprint data
         Map<String, Object> sprintData = new HashMap<>();
         sprintData.put("name", name);
         sprintData.put("goal", goal);
@@ -408,7 +405,6 @@ public class SprintShellCommands {
         sprintData.put("endDate", endDate);
         sprintData.put("scrumMasterId", scrumMasterId);
 
-        // Call the API to create the sprint
         try {
             Map<String, Object> response = apiService.post("/sprints", sprintData, Map.class);
 
@@ -420,7 +416,6 @@ public class SprintShellCommands {
             }
         } catch (Exception e) {
             shellService.printError("Error could not create the sprint");
-            e.printStackTrace();
         }
     }
 
