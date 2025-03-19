@@ -61,7 +61,7 @@ public class SprintShellCommands {
             shellService.printTable(headers, tableData.toArray(new String[0][]));
 
         } catch (Exception e) {
-            shellService.printError("Error fetching sprint list: " + e.getMessage());
+            shellService.printError("Error could not fetch the sprint list: ");
         }
     }
 
@@ -85,7 +85,6 @@ public class SprintShellCommands {
         }
 
         try {
-            // Get the specific sprint by its ID
             Map<String, Object> sprint = apiService.get("/sprints/" + sprintId, Map.class);
 
             if (sprint == null || sprint.isEmpty()) {
@@ -93,7 +92,6 @@ public class SprintShellCommands {
                 return;
             }
 
-            // Display sprint details in a structured table
             String[] headers = {"ID", "Name", "Goal", "Capacity", "Start Date", "End Date", "Is Active"};
             String[] row = {
                     String.valueOf(sprint.get("id")),
@@ -108,7 +106,7 @@ public class SprintShellCommands {
             shellService.printTable(headers, new String[][]{row});
 
         } catch (Exception e) {
-            shellService.printError("Error fetching sprint details: " + e.getMessage());
+            shellService.printError("Error could not fetch the sprint details: ");
         }
     }
 
@@ -118,6 +116,31 @@ public class SprintShellCommands {
     public void startSprint() {
         if (!userSession.isAuthenticated()) {
             shellService.printError("You need to log in before starting a sprint.");
+            return;
+        }
+
+        try {
+            List<Map<String, Object>> sprints = apiService.get("/sprints", List.class);
+            if (sprints == null || sprints.isEmpty()) {
+                shellService.printInfo("No sprints available.");
+                return;
+            }
+            shellService.printInfo("List of all sprints:");
+            for (Map<String, Object> sprint : sprints) {
+                String[] headers = {"ID", "Name", "Goal", "Capacity", "Start Date", "End Date", "Is Active"};
+                String[] row = {
+                        String.valueOf(sprint.get("id")),
+                        String.valueOf(sprint.get("name")),
+                        String.valueOf(sprint.get("goal")),
+                        String.valueOf(sprint.get("capacityPoints")),
+                        String.valueOf(sprint.get("startDate")),
+                        String.valueOf(sprint.get("endDate")),
+                        String.valueOf(sprint.get("active"))
+                };
+                shellService.printTable(headers, new String[][]{row});
+            }
+        } catch (Exception e) {
+            shellService.printError("Error could not fetch the sprint Id: ");
             return;
         }
 
@@ -137,21 +160,44 @@ public class SprintShellCommands {
             sprintStatus.put("active", true);
             apiService.put("/sprints/" + sprintId, sprintStatus, Void.class);
             shellService.printSuccess("Sprint with ID " + sprintId + " has been started successfully!");
-
         } catch (Exception e) {
-            shellService.printError("Error starting sprint: " + e.getMessage());
+            shellService.printError("Error could not start the sprint");
         }
     }
-
 
     @ShellMethod(key = "sprint-end", value = "End a sprint")
     @ShellMethodAvailability("isUserLoggedIn")
     public void endSprint() {
         if (!userSession.isAuthenticated()) {
-            shellService.printError("You need to log in before starting a sprint.");
+            shellService.printError("You need to log in before ending a sprint.");
             return;
         }
+        try {
+            List<Map<String, Object>> sprints = apiService.get("/sprints", List.class);
+            if (sprints == null || sprints.isEmpty()) {
+                shellService.printInfo("No sprints available.");
+                return;
+            }
 
+            shellService.printInfo("List of all sprints:");
+            for (Map<String, Object> sprint : sprints) {
+                String[] headers = {"ID", "Name", "Goal", "Capacity", "Start Date", "End Date", "Is Active"};
+                String[] row = {
+                        String.valueOf(sprint.get("id")),
+                        String.valueOf(sprint.get("name")),
+                        String.valueOf(sprint.get("goal")),
+                        String.valueOf(sprint.get("capacityPoints")),
+                        String.valueOf(sprint.get("startDate")),
+                        String.valueOf(sprint.get("endDate")),
+                        String.valueOf(sprint.get("active"))
+                };
+
+                shellService.printTable(headers, new String[][]{row});
+            }
+        } catch (Exception e) {
+            shellService.printError("Error could not fetch the sprint Id: ");
+            return;
+        }
         Scanner scanner = new Scanner(System.in);
         shellService.printInfo("Enter the Sprint ID to end:");
 
@@ -163,17 +209,16 @@ public class SprintShellCommands {
             return;
         }
 
+        // End the sprint
         try {
             Map<String, Object> sprintStatus = apiService.get("/sprints/" + sprintId, Map.class);
             sprintStatus.put("active", false);
             apiService.put("/sprints/" + sprintId, sprintStatus, Void.class);
             shellService.printSuccess("Sprint with ID " + sprintId + " has been ended successfully!");
-
         } catch (Exception e) {
-            shellService.printError("Error ending sprint: " + e.getMessage());
+            shellService.printError("Error could not end the sprint");
         }
     }
-
 
     @ShellMethod(key = "sprint-edit", value = "Edit a sprint's details")
     @ShellMethodAvailability("isUserLoggedIn")
@@ -201,7 +246,6 @@ public class SprintShellCommands {
                 return;
             }
 
-            // Display sprint details in a table format
             String[] headers = {"ID", "Name", "Goal", "Capacity", "Start Date", "End Date", "Is Active"};
             String[] row = {
                     String.valueOf(sprintEdit.get("id")),
@@ -215,7 +259,6 @@ public class SprintShellCommands {
 
             shellService.printTable(headers, new String[][]{row});
 
-            // Prompt user for editing fields
             shellService.printInfo("Which fields would you like to edit? (comma-separated list: name, goal, capacityPoints, startDate, endDate):");
             String fieldsToEditInput = scanner.nextLine().trim().toLowerCase();
 
@@ -238,10 +281,9 @@ public class SprintShellCommands {
             shellService.printSuccess("Sprint with ID " + sprintId + " has been updated successfully!");
 
         } catch (Exception e) {
-            shellService.printError("Error editing sprint: " + e.getMessage());
+            shellService.printError("Error could not edit the sprint");
         }
     }
-
     @ShellMethod(key = "sprint-owner", value = "Find the owner/scrum master of a sprint")
     @ShellMethodAvailability("isUserLoggedIn")
     public void findSprintOwner() {
@@ -272,7 +314,7 @@ public class SprintShellCommands {
                 shellService.printError("No owner or scrum master found for Sprint ID " + sprintId);
                 return;
             }
-            Map<String, Object> user = apiService.get("/users/" + ownerId, Map.class);
+            Map<String, Object> user = apiService.get("/users/search" + ownerId, Map.class);
             if (user == null) {
                 shellService.printError("Error retrieving user details for owner/scrum master.");
                 return;
@@ -281,7 +323,7 @@ public class SprintShellCommands {
             shellService.printSuccess("Owner/Scrum Master of Sprint ID " + sprintId + ": " + userName);
 
         } catch (Exception e) {
-            shellService.printError("Error finding sprint owner: " + e.getMessage());
+            shellService.printError("Error could not find the sprint owner");
         }
     }
 
@@ -297,22 +339,38 @@ public class SprintShellCommands {
         String loggedInUserRole = userSession.getUserRole();
         String loggedInUserId = userSession.getUserId();
 
-        UUID scrumMasterId;
+        UUID scrumMasterId = null;
 
-        if ("SCRUM_MASTER".equalsIgnoreCase(loggedInUserRole)) {
+        if ("SCRUM_MASTER".equalsIgnoreCase(loggedInUserRole)){
             scrumMasterId = UUID.fromString(loggedInUserId);
             shellService.printInfo("You are a Scrum Master, and your ID will be used for the Scrum Master.");
         } else {
-            shellService.printInfo("Enter Scrum Master's ID (UUID format):");
-            String scrumMasterIdInput = scanner.nextLine().trim();
+            shellService.printInfo("Enter the name of the Scrum Master:");
+            String scrumMasterName = scanner.nextLine().trim();
 
             try {
-                scrumMasterId = UUID.fromString(scrumMasterIdInput);
-            } catch (IllegalArgumentException e) {
-                shellService.printError("Invalid UUID format. Please enter a valid UUID.");
+                // Search for the Scrum Master by name using the API
+                Object[] users = apiService.get("/users/search?name=" + scrumMasterName, Object[].class);
+
+                if (users != null && users.length > 0) {  // Ensure users is not null before accessing length
+                    // Assuming the first user is the correct one
+                    Map<String, Object> scrumMaster = (Map<String, Object>) users[0];
+
+                    if (scrumMaster.containsKey("id")) { // Check if "id" key exists
+                        scrumMasterId = UUID.fromString((String) scrumMaster.get("id"));
+                        shellService.printInfo("Scrum Master found. ID: " + scrumMasterId);
+                    } else {
+                        shellService.printError("Scrum Master ID not found in response.");
+                        return;
+                    }
+                } else {
+                    shellService.printError("Scrum Master with name " + scrumMasterName + " not found.");
+                    return;
+                }
+            } catch (Exception e) {
+                shellService.printError("Error could not fetch the Scrum Master's ID");
                 return;
             }
-            shellService.printInfo("Scrum Master ID accepted: " + scrumMasterId);
         }
         shellService.printInfo("Enter sprint name:");
         String name = scanner.nextLine().trim();
@@ -357,8 +415,7 @@ public class SprintShellCommands {
                 shellService.printError("Failed to create sprint. Response is null.");
             }
         } catch (Exception e) {
-            shellService.printError("Error creating sprint: " + e.getMessage());
-            e.printStackTrace();
+            shellService.printError("Error could not create the sprint");
         }
     }
 
