@@ -41,7 +41,6 @@ public class AuthService {
     public Optional<AuthResponseDTO> authenticateWithGoogle(String googleIdToken) {
         return googleTokenVerifier.verify(googleIdToken)
                 .map(googleUserInfo -> {
-                    // Look for existing user by Google ID
                     Optional<User> existingUser = userRepository.findByGoogleId(googleUserInfo.getGoogleId());
 
                     User user = existingUser.orElseGet(() -> createNewUser(googleUserInfo));
@@ -66,8 +65,7 @@ public class AuthService {
     private User createNewUser(GoogleTokenVerifier.GoogleUserInfo googleUserInfo) {
         logger.info("Creating new user for Google account: {}", googleUserInfo.getEmail());
 
-        // Get the default role (SCRUM_MASTER)
-        Role defaultRole = roleRepository.findByName("SCRUM_MASTER")
+        Role defaultRole = roleRepository.findByName("DEVELOPER")
                 .orElseThrow(() -> new IllegalStateException("Default role not found"));
 
         User newUser = new User();

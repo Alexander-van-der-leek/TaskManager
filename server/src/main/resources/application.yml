@@ -4,7 +4,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/taskmanagement
     username: postgres
-    password: admin
+    password: DatabaseConnection
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:

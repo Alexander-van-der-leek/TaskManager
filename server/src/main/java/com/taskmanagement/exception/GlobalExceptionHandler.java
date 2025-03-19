@@ -13,9 +13,11 @@ import org.springframework.web.context.request.WebRequest;
 import java.util.Date;
 import java.util.stream.Collectors;
 
+// setup global exception handler for errors
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    // general resource not found
     @ExceptionHandler(ResourceNotFound.class)
     public ResponseEntity<ApiErrorResponse> handleResourceNotFoundException(
             ResourceNotFound ex, WebRequest request) {
@@ -28,6 +30,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
+    // unauthorized calls
     @ExceptionHandler(UnauthorizedAccessException.class)
     public ResponseEntity<ApiErrorResponse> handleUnauthorizedException(
             UnauthorizedAccessException ex, WebRequest request) {
@@ -40,6 +43,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
     }
 
+    //validation errors
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiErrorResponse> handleValidationException(
             MethodArgumentNotValidException ex, WebRequest request) {
@@ -56,6 +60,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
+    // access denied
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiErrorResponse> handleAccessDeniedException(
             AccessDeniedException ex, WebRequest request) {
@@ -68,6 +73,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
     }
 
+    // server error
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleGlobalException(
             Exception ex, WebRequest request) {

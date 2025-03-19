@@ -49,7 +49,6 @@ public class UserShellCommand {
             @ShellOption(help = "Name of the user to update") String name
     ) {
         try {
-            // Step 1: Check if the user is authorized
             if (!isAuthorized()) {
                 shellService.printError("You do not have permission to update users.");
                 return;
@@ -175,7 +174,6 @@ public class UserShellCommand {
 
             shellService.printHeading("Deactivating user by name: " + name);
 
-            // Fetch users based on the provided name
             Object[] users = apiService.get("/users/search?name=" + name, Object[].class);
 
             if (users.length == 0) {

@@ -4,6 +4,7 @@ import org.jline.terminal.Terminal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+// helpers for shell printing ect.
 @Service
 public class ShellService {
 
@@ -76,12 +77,7 @@ public class ShellService {
         terminal.writer().println(dividerLine.toString());
         terminal.flush();
     }
-    /**
-     * Prompts the user for input and returns the input.
-     *
-     * @param prompt the message to display to the user
-     * @return the user's input as a String
-     */
+
     public String promptForInput(String prompt) {
         try {
             terminal.writer().print(prompt + " ");

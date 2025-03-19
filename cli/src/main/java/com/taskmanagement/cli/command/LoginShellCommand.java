@@ -41,9 +41,10 @@ public class LoginShellCommand {
                 Scanner scanner = new Scanner(System.in);
                 idToken = scanner.nextLine().trim();
             } else {
-                // Generate auth URL and open in browser
+                // setup auth
                 URI authUrl = oAuthService.getAuthorizationUrl();
 
+                // try auto open
                 if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
                     shellService.printInfo("Opening browser for authentication...");
                     Desktop.getDesktop().browse(authUrl);
@@ -52,8 +53,8 @@ public class LoginShellCommand {
                     shellService.printInfo(authUrl.toString());
                 }
 
-                // Start local server to receive the auth callback
                 shellService.printInfo("Waiting for authentication...");
+                // wait for auth success
                 idToken = oAuthService.waitForAuthorizationCode();
 
                 if (idToken == null) {
@@ -62,17 +63,16 @@ public class LoginShellCommand {
                 }
             }
 
-            // Exchange Google ID token for application JWT token
             shellService.printInfo("Authenticating with server...");
 
             try {
+                // try and auth that token on server
                 Map<String, Object> response = apiService.authenticate(idToken);
 
                 String token = (String) response.get("token");
                 String name = (String) response.get("name");
                 String email = (String) response.get("email");
 
-                // Save token to session
                 userSession.setToken(token);
                 userSession.setUserName(name);
                 userSession.setUserEmail(email);
@@ -87,7 +87,7 @@ public class LoginShellCommand {
         }
     }
 
-    @ShellMethod(key = "signout", value = "Sign out and clear session")
+    @ShellMethod(key = "logout", value = "Log out and clear session")
     public void signout() {
         if (userSession.isAuthenticated()) {
             String name = userSession.getUserName();

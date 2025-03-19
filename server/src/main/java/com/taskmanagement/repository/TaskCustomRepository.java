@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+// had to add this to get filtering to work instead of via query
 @Repository
 public class TaskCustomRepository {
 

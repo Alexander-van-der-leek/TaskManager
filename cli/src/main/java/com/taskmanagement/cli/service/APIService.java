@@ -35,6 +35,7 @@ public class APIService {
         this.userSession = userSession;
     }
 
+    // authenticating user
     public Map<String, Object> authenticate(String idToken) {
         Map<String, String> requestBody = new HashMap<>();
         requestBody.put("idToken", idToken);
@@ -61,7 +62,8 @@ public class APIService {
         }
     }
 
-    // Generic method for authenticated GET requests
+    // Generic methods to use for all rest functionality, just generic return
+
     public <T> T get(String uri, Class<T> responseType) {
         try {
             return webClient.get()
@@ -76,7 +78,6 @@ public class APIService {
         }
     }
 
-    // Generic method for authenticated POST requests
     public <T> T post(String uri, Object body, Class<T> responseType) {
         try{
             return webClient.post()
@@ -92,7 +93,6 @@ public class APIService {
         }
     }
 
-    // Generic method for authenticated PUT requests
     public <T> T put(String uri, Object body, Class<T> responseType) {
         try {
             return webClient.put()
@@ -108,7 +108,6 @@ public class APIService {
         }
     }
 
-    // Generic method for authenticated PATCH requests
     public <T> T patch(String uri, Object body, Class<T> responseType) {
         try {
             return webClient.patch()
@@ -124,7 +123,6 @@ public class APIService {
         }
     }
 
-    // Generic method for authenticated DELETE requests
     public <T> T delete(String uri, Class<T> responseType) {
         try {
             return webClient.delete()
@@ -139,13 +137,20 @@ public class APIService {
         }
     }
 
+    // just add error handler
     private void handleApiError(WebClientResponseException ex) {
         try {
             Map<String, Object> errorResponse = objectMapper.readValue(
                     ex.getResponseBodyAsString(), new TypeReference<Map<String, Object>>() {});
-            String errorMessage = (String) errorResponse.getOrDefault("message",
+            String originalMessage = (String) errorResponse.getOrDefault("message",
                     "Unknown error: " + ex.getMessage());
-            throw new RuntimeException(errorMessage);
+
+            String cleanedMessage = originalMessage;
+            if (originalMessage.startsWith("An unexpected error occurred: ")) {
+                cleanedMessage = originalMessage.substring("An unexpected error occurred: ".length());
+            }
+
+            throw new RuntimeException(cleanedMessage);
         } catch (JsonProcessingException jsonException) {
             throw new RuntimeException("API Error: " + ex.getStatusCode() + " - " + ex.getMessage());
         }

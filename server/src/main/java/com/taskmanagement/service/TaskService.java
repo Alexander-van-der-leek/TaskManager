@@ -51,11 +51,11 @@ public class TaskService {
         this.taskCustomRepository = taskCustomRepository;
     }
 
+    // parsing zonedate from string
     private ZonedDateTime parseDate(String dateStr) {
         if (dateStr == null || dateStr.trim().isEmpty()) {
             return null;
         }
-
         try {
             LocalDate localDate = LocalDate.parse(dateStr);
             return localDate.atStartOfDay(ZoneId.systemDefault());
@@ -77,6 +77,7 @@ public class TaskService {
     }
 
 
+    // get tasks based on filter dto
     @Transactional(readOnly = true)
     public List<TaskDTO> getTasksByFilter(TaskFilterDTO filterDTO, UUID userId) {
         logger.debug("Fetching tasks by filter for user: {}", userId);
@@ -99,6 +100,7 @@ public class TaskService {
                 .collect(Collectors.toList());
     }
 
+    // get tasks assigned to person
     @Transactional(readOnly = true)
     public List<TaskDTO> getTasksByAssignee(UUID assigneeId, UUID requesterId) {
         logger.debug("Fetching tasks assigned to user: {}", assigneeId);
@@ -111,6 +113,7 @@ public class TaskService {
                 .collect(Collectors.toList());
     }
 
+    // get active tasks
     @Transactional(readOnly = true)
     public List<TaskDTO> getUserActiveTasks(UUID userId) {
         logger.debug("Fetching active tasks for user: {}", userId);
@@ -120,6 +123,7 @@ public class TaskService {
                 .collect(Collectors.toList());
     }
 
+    // get tasks for epic
     @Transactional(readOnly = true)
     public List<TaskDTO> getTasksByEpic(Integer epicId, UUID userId) {
         logger.debug("Fetching tasks for epic: {}", epicId);
@@ -133,6 +137,7 @@ public class TaskService {
                 .collect(Collectors.toList());
     }
 
+    // get tasks for sprint
     @Transactional(readOnly = true)
     public List<TaskDTO> getTasksBySprint(Integer sprintId, UUID userId) {
         logger.debug("Fetching tasks for sprint: {}", sprintId);
@@ -146,6 +151,7 @@ public class TaskService {
                 .collect(Collectors.toList());
     }
 
+    // get stats for a sprint
     @Transactional(readOnly = true)
     public Map<String, Long> getSprintStats(Integer sprintId, UUID userId) {
         logger.debug("Calculating sprint statistics for sprint: {}", sprintId);
@@ -156,6 +162,7 @@ public class TaskService {
 
         List<TaskStatus> statuses = statusRepository.findAll();
 
+        // need to count for each status
         Map<String, Long> statusCounts = statuses.stream()
                 .collect(Collectors.toMap(
                         TaskStatus::getName,
@@ -165,6 +172,7 @@ public class TaskService {
         return statusCounts;
     }
 
+    // get task by an id
     @Transactional(readOnly = true)
     public TaskDTO getTaskById(Integer id, UUID userId) {
         logger.debug("Fetching task: {} for user: {}", id, userId);
@@ -175,6 +183,7 @@ public class TaskService {
         return convertToDTO(task);
     }
 
+    // creating a task
     @Transactional
     public TaskDTO createTask(TaskDTO taskDTO, UUID creatorId) {
         logger.debug("Creating new task by user: {}", creatorId);
@@ -184,6 +193,10 @@ public class TaskService {
 
         User assignee = userRepository.findById(taskDTO.getAssignedToId())
                 .orElseThrow(() -> new ResourceNotFound("Assigned user not found with id: " + taskDTO.getAssignedToId()));
+
+        if (assignee.getIsActive() == null || !assignee.getIsActive()) {
+            throw new IllegalStateException("Cannot assign task to inactive user: " + assignee.getName());
+        }
 
         TaskStatus status = statusRepository.findById(taskDTO.getStatusId())
                 .orElseThrow(() -> new ResourceNotFound("Status not found with id: " + taskDTO.getStatusId()));
@@ -205,12 +218,26 @@ public class TaskService {
         if (taskDTO.getEpicId() != null) {
             Epic epic = epicRepository.findById(taskDTO.getEpicId())
                     .orElseThrow(() -> new ResourceNotFound("Epic not found with id: " + taskDTO.getEpicId()));
+
+            // check epic capacity
+            checkEpicCapacity(epic, task.getStoryPoints(), 0);
+
+            // check date compatibility
+            validateTaskEpicDateCompatibility(task.getDueDate(), epic);
+
             task.setEpic(epic);
         }
 
         if (taskDTO.getSprintId() != null) {
             Sprint sprint = sprintRepository.findById(taskDTO.getSprintId())
                     .orElseThrow(() -> new ResourceNotFound("Sprint not found with id: " + taskDTO.getSprintId()));
+
+            // check sprint capacity
+            checkSprintCapacity(sprint, task.getStoryPoints(), 0);
+
+            // check sprint date compatibility
+            validateTaskSprintDateCompatibility(task.getDueDate(), sprint);
+
             task.setSprint(sprint);
         }
 
@@ -224,6 +251,7 @@ public class TaskService {
         return convertToDTO(savedTask);
     }
 
+    // possibly try move some of this to pre-auth later
     @Transactional
     public TaskDTO updateTask(TaskDTO taskDTO, UUID updaterId) {
         logger.debug("Updating task: {} by user: {}", taskDTO.getId(), updaterId);
@@ -246,6 +274,10 @@ public class TaskService {
         User assignee = userRepository.findById(taskDTO.getAssignedToId())
                 .orElseThrow(() -> new ResourceNotFound("Assigned user not found with id: " + taskDTO.getAssignedToId()));
 
+        if (assignee.getIsActive() == null || !assignee.getIsActive()) {
+            throw new IllegalStateException("Cannot assign task to inactive user: " + assignee.getName());
+        }
+
         TaskStatus status = statusRepository.findById(taskDTO.getStatusId())
                 .orElseThrow(() -> new ResourceNotFound("Status not found with id: " + taskDTO.getStatusId()));
 
@@ -257,6 +289,8 @@ public class TaskService {
         existingTask.setPriority(priority);
         existingTask.setTitle(taskDTO.getTitle());
         existingTask.setDescription(taskDTO.getDescription());
+
+        int oldStoryPoints = existingTask.getStoryPoints();
         existingTask.setStoryPoints(taskDTO.getStoryPoints());
         existingTask.setEstimatedHours(taskDTO.getEstimatedHours());
         existingTask.setDueDate(taskDTO.getDueDate());
@@ -264,6 +298,19 @@ public class TaskService {
         if (taskDTO.getEpicId() != null) {
             Epic epic = epicRepository.findById(taskDTO.getEpicId())
                     .orElseThrow(() -> new ResourceNotFound("Epic not found with id: " + taskDTO.getEpicId()));
+            if (existingTask.getEpic() == null || !(existingTask.getEpic().getId()==(epic.getId())) ||
+                    oldStoryPoints != taskDTO.getStoryPoints()) {
+
+                // have to consider old point values
+                int pointsToConsider = existingTask.getEpic() != null &&
+                        existingTask.getEpic().getId()==(epic.getId()) ?
+                        oldStoryPoints : 0;
+
+                checkEpicCapacity(epic, taskDTO.getStoryPoints(), pointsToConsider);
+            }
+
+            validateTaskEpicDateCompatibility(existingTask.getDueDate(), epic);
+
             existingTask.setEpic(epic);
         } else {
             existingTask.setEpic(null);
@@ -272,6 +319,24 @@ public class TaskService {
         if (taskDTO.getSprintId() != null) {
             Sprint sprint = sprintRepository.findById(taskDTO.getSprintId())
                     .orElseThrow(() -> new ResourceNotFound("Sprint not found with id: " + taskDTO.getSprintId()));
+
+            if (!sprint.isActive()) {
+                throw new IllegalStateException("Cannot add task to inactive sprint: " + sprint.getName());
+            }
+
+            if (existingTask.getSprint() == null || !(existingTask.getSprint().getId()==(sprint.getId())) ||
+                    oldStoryPoints != taskDTO.getStoryPoints()) {
+
+                // same as epic need to consider existing point totals
+                int pointsToConsider = existingTask.getSprint() != null &&
+                        existingTask.getSprint().getId() == (sprint.getId()) ?
+                        oldStoryPoints : 0;
+
+                checkSprintCapacity(sprint, taskDTO.getStoryPoints(), pointsToConsider);
+            }
+
+            validateTaskSprintDateCompatibility(existingTask.getDueDate(), sprint);
+
             existingTask.setSprint(sprint);
         } else {
             existingTask.setSprint(null);
@@ -290,6 +355,16 @@ public class TaskService {
         return convertToDTO(updatedTask);
     }
 
+    // ability to search by a title
+    @Transactional(readOnly = true)
+    public List<TaskDTO> searchTasksByTitle(String title, UUID userId) {
+        logger.debug("Searching for tasks with title containing: {}", title);
+        return taskRepository.findByTitleContainingIgnoreCase(title).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    // change statuses
     @Transactional
     public TaskDTO changeTaskStatus(Integer taskId, Integer statusId, UUID userId) {
         logger.debug("Changing status of task: {} to status: {} by user: {}", taskId, statusId, userId);
@@ -330,6 +405,7 @@ public class TaskService {
         return convertToDTO(updatedTask);
     }
 
+    // assign task to someone
     @Transactional
     public TaskDTO assignTask(Integer taskId, UUID assigneeId, UUID userId) {
         logger.debug("Assigning task: {} to user: {} by user: {}", taskId, assigneeId, userId);
@@ -339,6 +415,11 @@ public class TaskService {
 
         User assignee = userRepository.findById(assigneeId)
                 .orElseThrow(() -> new ResourceNotFound("User not found with id: " + assigneeId));
+
+        // need isactive checks
+        if (assignee.getIsActive() == null || !assignee.getIsActive()) {
+            throw new IllegalStateException("Cannot assign task to inactive user: " + assignee.getName());
+        }
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFound("User not found with id: " + userId));
@@ -364,6 +445,7 @@ public class TaskService {
         return convertToDTO(updatedTask);
     }
 
+    // add tasks to sprints
     @Transactional
     public TaskDTO addTaskToSprint(Integer taskId, Integer sprintId, UUID userId) {
         logger.debug("Adding task: {} to sprint: {} by user: {}", taskId, sprintId, userId);
@@ -374,10 +456,18 @@ public class TaskService {
         Sprint sprint = sprintRepository.findById(sprintId)
                 .orElseThrow(() -> new ResourceNotFound("Sprint not found with id: " + sprintId));
 
+        // need to check for active sprints
         if (!sprint.isActive()) {
             logger.warn("User {} attempted to add task {} to inactive sprint {}", userId, taskId, sprintId);
             throw new IllegalStateException("Cannot add tasks to inactive sprints");
         }
+
+        int pointsToConsider = task.getSprint() != null && task.getSprint().getId()==(sprint.getId()) ?
+                task.getStoryPoints() : 0;
+        checkSprintCapacity(sprint, task.getStoryPoints(), pointsToConsider);
+
+        // still validate point totals
+        validateTaskSprintDateCompatibility(task.getDueDate(), sprint);
 
         Integer previousSprintId = task.getSprint() != null ? task.getSprint().getId() : null;
 
@@ -412,6 +502,7 @@ public class TaskService {
         return convertToDTO(updatedTask);
     }
 
+    // adding tasks to epics
     @Transactional
     public TaskDTO addTaskToEpic(Integer taskId, Integer epicId, UUID userId) {
         logger.debug("Adding task: {} to epic: {} by user: {}", taskId, epicId, userId);
@@ -421,6 +512,13 @@ public class TaskService {
 
         Epic epic = epicRepository.findById(epicId)
                 .orElseThrow(() -> new ResourceNotFound("Epic not found with id: " + epicId));
+
+        // need date and point validity
+        int pointsToConsider = task.getEpic() != null && task.getEpic().getId()==(epic.getId()) ?
+                task.getStoryPoints() : 0;
+        checkEpicCapacity(epic, task.getStoryPoints(), pointsToConsider);
+
+        validateTaskEpicDateCompatibility(task.getDueDate(), epic);
 
         Integer previousEpicId = task.getEpic() != null ? task.getEpic().getId() : null;
 
@@ -473,7 +571,6 @@ public class TaskService {
         if (!(isAdmin || isScrumMaster || (isCreator && isBacklog))) {
             throw new UnauthorizedAccessException("You don't have permission to delete this task");
         }
-
 
         taskRepository.deleteById(id);
         logger.info("Deleted task with ID: {}", id);
@@ -531,6 +628,96 @@ public class TaskService {
         dto.setName(priority.getName());
         dto.setValue(priority.getValue());
         return dto;
+    }
+
+    public TaskDTO removeEpicFromTask(Integer taskId, UUID userId) {
+        TaskDTO task = getTaskById(taskId, userId);
+
+        task.setEpicId(null);
+
+        return updateTask(task, userId);
+    }
+
+    private void validateTaskSprintDateCompatibility(ZonedDateTime taskDueDate, Sprint sprint) {
+        if (taskDueDate != null && sprint.getEndDate() != null && taskDueDate.isAfter(sprint.getEndDate())) {
+            throw new IllegalStateException(
+                    String.format("Task due date (%s) is after sprint end date (%s)",
+                            taskDueDate.toLocalDate(), sprint.getEndDate().toLocalDate()));
+        }
+
+        if (taskDueDate != null && sprint.getStartDate() != null &&
+                taskDueDate.isBefore(sprint.getStartDate())) {
+            throw new IllegalStateException(
+                    String.format("Task due date (%s) is before sprint start date (%s)",
+                            taskDueDate.toLocalDate(), sprint.getStartDate().toLocalDate()));
+        }
+
+        ZonedDateTime now = ZonedDateTime.now();
+        if (sprint.getEndDate() != null && now.isAfter(sprint.getEndDate())) {
+            throw new IllegalStateException(
+                    String.format("Cannot add task to completed sprint. Sprint ended on %s",
+                            sprint.getEndDate().toLocalDate()));
+        }
+    }
+
+    private void validateTaskEpicDateCompatibility(ZonedDateTime taskDueDate, Epic epic) {
+        if (taskDueDate != null && epic.getTargetEndDate() != null &&
+                taskDueDate.isAfter(epic.getTargetEndDate())) {
+            throw new IllegalStateException(
+                    String.format("Task due date (%s) is after epic target end date (%s)",
+                            taskDueDate.toLocalDate(), epic.getTargetEndDate().toLocalDate()));
+        }
+
+        if (taskDueDate != null && epic.getStartDate() != null &&
+                taskDueDate.isBefore(epic.getStartDate())) {
+            throw new IllegalStateException(
+                    String.format("Task due date (%s) is before epic start date (%s)",
+                            taskDueDate.toLocalDate(), epic.getStartDate().toLocalDate()));
+        }
+
+        if (epic.getActualEndDate() != null) {
+            throw new IllegalStateException(
+                    String.format("Cannot add task to completed epic. Epic was completed on %s",
+                            epic.getActualEndDate().toLocalDate()));
+        }
+    }
+
+    // capacity helper for epics, get all tasks and add
+    private void checkEpicCapacity(Epic epic, int taskStoryPoints, int existingPointsToSubtract) {
+        List<Task> epicTasks = taskRepository.findByEpicId(epic.getId());
+
+        int currentStoryPoints = epicTasks.stream()
+                .mapToInt(Task::getStoryPoints)
+                .sum();
+
+        currentStoryPoints -= existingPointsToSubtract;
+
+        int newTotal = currentStoryPoints + taskStoryPoints;
+
+        if (epic.getStoryPoints() != null && epic.getStoryPoints() > 0 && newTotal > epic.getStoryPoints()) {
+            throw new IllegalStateException(
+                    String.format("Adding this task would exceed the epic's capacity. Current: %d, Adding: %d, Capacity: %d",
+                            currentStoryPoints, taskStoryPoints, epic.getStoryPoints()));
+        }
+    }
+
+    // capacity helper for sprints
+    private void checkSprintCapacity(Sprint sprint, int taskStoryPoints, int existingPointsToSubtract) {
+        List<Task> sprintTasks = taskRepository.findBySprintId(sprint.getId());
+
+        int currentStoryPoints = sprintTasks.stream()
+                .mapToInt(Task::getStoryPoints)
+                .sum();
+
+        currentStoryPoints -= existingPointsToSubtract;
+
+        int newTotal = currentStoryPoints + taskStoryPoints;
+
+        if (sprint.getCapacityPoints() > 0 && newTotal > sprint.getCapacityPoints()) {
+            throw new IllegalStateException(
+                    String.format("Adding this task would exceed the sprint's capacity. Current: %d, Adding: %d, Capacity: %d",
+                            currentStoryPoints, taskStoryPoints, sprint.getCapacityPoints()));
+        }
     }
 
     private TaskDTO convertToDTO(Task task) {

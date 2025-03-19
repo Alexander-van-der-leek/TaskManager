@@ -27,8 +27,10 @@ public class OAuthService {
     private static final String GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/auth";
     private static final String SCOPE = "email profile";
 
+    // basic allow to wait it, we complete it later with the idtoken
     private CompletableFuture<String> authFuture;
 
+    // auth uri
     public URI getAuthorizationUrl() throws URISyntaxException {
         String encodedRedirectUri = URLEncoder.encode(redirectUri, StandardCharsets.UTF_8);
         String encodedScope = URLEncoder.encode(SCOPE, StandardCharsets.UTF_8);
@@ -44,10 +46,10 @@ public class OAuthService {
         return new URI(url);
     }
 
+    // setup callback site
     public String waitForAuthorizationCode() throws IOException, InterruptedException {
         authFuture = new CompletableFuture<>();
 
-        // Start local HTTP server to capture the response
         HttpServer server = HttpServer.create(new InetSocketAddress(8888), 0);
 
         server.createContext("/callback", exchange -> {
@@ -81,7 +83,6 @@ public class OAuthService {
         server.start();
 
         try {
-            // Wait for the authentication to complete
             String idToken = authFuture.get(5, TimeUnit.MINUTES);
             return idToken;
         } catch (Exception e) {
