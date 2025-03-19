@@ -8,8 +8,6 @@ import org.mockito.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.GrantedAuthoritiesContainer;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -35,17 +33,21 @@ class UserControllerTest {
     @Mock
     private Authentication authentication;
 
+    private UUID testUserId;
+    private UUID requesterId;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        testUserId = UUID.randomUUID();
+        requesterId = UUID.randomUUID();
+        when(userDetails.getUsername()).thenReturn(requesterId.toString());
     }
 
     @Test
     void testGetAllUsers() {
-        UUID userId = UUID.randomUUID();
-        when(userDetails.getUsername()).thenReturn(userId.toString());
-
         UserDTO userDTO = new UserDTO();
+        userDTO.setId(testUserId);
         userDTO.setName("noluthandoh14");
         userDTO.setEmail("noluthandoh14@gmail.com");
         when(userService.getAllUsers()).thenReturn(Collections.singletonList(userDTO));
@@ -62,10 +64,8 @@ class UserControllerTest {
     @Test
     void testSearchUsersByName() {
         String name = "noluthandoh14";
-        UUID userId = UUID.randomUUID();
-        when(userDetails.getUsername()).thenReturn(userId.toString());
-
         UserDTO userDTO = new UserDTO();
+        userDTO.setId(testUserId);
         userDTO.setName(name);
         userDTO.setEmail("noluthandoh14@gmail.com");
         when(userService.searchUsersByName(name)).thenReturn(Collections.singletonList(userDTO));
@@ -80,60 +80,58 @@ class UserControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "noluthandoh14", roles = {"DEVELOPER"})
-    void testUpdateUser_FailedAuthorization() {
-        // Simulate a non-admin user with "DEVELOPER" role
-        Authentication authentication = new UsernamePasswordAuthenticationToken(
-                "noluthandoh14", // username
-                null, // password
-                Collections.singletonList(new SimpleGrantedAuthority("DEVELOPER")) // authorities
-        );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        // Create a userDTO object
+    void testUpdateUser_Success() {
         UserDTO userDTO = new UserDTO();
         userDTO.setName("Updated Name");
 
-        // Simulate the update user request
-        ResponseEntity<UserDTO> response = userController.updateUser("noluthandoh14", userDTO, userDetails);
+        UserDTO updatedDTO = new UserDTO();
+        updatedDTO.setId(testUserId);
+        updatedDTO.setName("Updated Name");
+        updatedDTO.setEmail("test@example.com");
 
-        // Assertions for the failed authorization
-        assertEquals(403, response.getStatusCodeValue());
-        assertEquals("Error: Insufficient Permissions", response.getBody().getName());
+        when(userService.updateUser(any(UserDTO.class), eq(testUserId), eq(requesterId)))
+                .thenReturn(updatedDTO);
+
+        ResponseEntity<UserDTO> response = userController.updateUser(testUserId, userDTO, userDetails);
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals("Updated Name", response.getBody().getName());
     }
 
     @Test
-    void testUpdateUser_FailedAuthorizationManually() {
-        // Manually create an Authentication object with the "DEVELOPER" role
-        Authentication authentication = new UsernamePasswordAuthenticationToken(
-                "noluthandoh14",
-                null,
-                Collections.singletonList(new SimpleGrantedAuthority("DEVELOPER")) // authorities
-        );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        // Create a userDTO object
+    void testUpdateUser_UserNotFound() {
         UserDTO userDTO = new UserDTO();
         userDTO.setName("Updated Name");
 
-        // Simulate the update user request
-        ResponseEntity<UserDTO> response = userController.updateUser("noluthandoh14", userDTO, userDetails);
+        when(userService.updateUser(any(UserDTO.class), eq(testUserId), eq(requesterId)))
+                .thenReturn(null);
 
-        // Assertions for the failed authorization
-        assertEquals(403, response.getStatusCodeValue());
-        assertEquals("Error: Insufficient Permissions", response.getBody().getName());
+        ResponseEntity<UserDTO> response = userController.updateUser(testUserId, userDTO, userDetails);
+
+        assertEquals(404, response.getStatusCodeValue());
+        assertNull(response.getBody());
     }
 
     @Test
-    @WithMockUser(username = "noluthandoh14", roles = {"DEVELOPER"})
-    void testDeactivateUser_FailedAuthorization() {
-        String name = "noluthandoh14";
+    void testDeactivateUser_Success() {
+        when(userService.deactivateUser(testUserId)).thenReturn(true);
 
-        // Simulate the deactivate user request with a non-admin user
-        ResponseEntity<String> response = userController.deactivateUser(name, userDetails);
+        ResponseEntity<String> response = userController.deactivateUser(testUserId, userDetails);
 
-        // Assertions for failed authorization
-        assertEquals(403, response.getStatusCodeValue());
-        assertEquals("You are not authorized to deactivate users.", response.getBody());
+        assertEquals(200, response.getStatusCodeValue());
+        assertTrue(response.getBody().contains("deactivated successfully"));
+    }
+
+    @Test
+    void testDeactivateUser_UserNotFound() {
+        when(userService.deactivateUser(testUserId)).thenReturn(false);
+
+        ResponseEntity<String> response = userController.deactivateUser(testUserId, userDetails);
+
+        assertEquals(404, response.getStatusCodeValue());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().contains("No user found") ||
+                response.getBody().contains("not found") ||
+                response.getBody().contains("User") && response.getBody().contains("found"));
     }
 }

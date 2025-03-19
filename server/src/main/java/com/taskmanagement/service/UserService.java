@@ -43,7 +43,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserDTO updateUser( UserDTO userDTO, String name,UUID id) {
+    public UserDTO updateUser(UserDTO userDTO, UUID id, UUID requesterId) {
         logger.info("Updating user with ID: {}", id);
 
         User existingUser = userRepository.findById(id)
@@ -69,19 +69,14 @@ public class UserService {
 
 
     @Transactional
-    public boolean deactivateUser(String name) {
-        List<User> users = userRepository.findByNameContainingIgnoreCase(name);
+    public boolean deactivateUser(UUID id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
 
-        if (users.isEmpty()) {
-            logger.error("User not found with name: {}", name);
-            throw new UserNotFoundException(UUID.randomUUID());
-        }
+        user.setIsActive(false);
+        userRepository.save(user);
 
-        User userToDeactivate = users.get(0);
-        userToDeactivate.setIsActive(false);
-        userRepository.save(userToDeactivate);
-
-        logger.info("User with name: {} has been deactivated.", name);
+        logger.info("User with ID: {} has been deactivated.", id);
         return true;
     }
 

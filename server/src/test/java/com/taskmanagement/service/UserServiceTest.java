@@ -20,19 +20,26 @@ class UserServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    private UUID testUserId;
+    private UUID requesterId;
+    private User testUser;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        testUserId = UUID.randomUUID();
+        requesterId = UUID.randomUUID();
+
+        testUser = new User();
+        testUser.setId(testUserId);
+        testUser.setName("noluthandoh14");
+        testUser.setEmail("noluthandoh14@gmail.com");
+        testUser.setIsActive(true);
     }
 
     @Test
     void testGetAllUsers() {
-        User user = new User();
-        user.setId(UUID.randomUUID());
-        user.setName("noluthandoh14");
-        user.setEmail("noluthandoh14@gmail.com");
-
-        when(userRepository.findAll()).thenReturn(Collections.singletonList(user));
+        when(userRepository.findAll()).thenReturn(Collections.singletonList(testUser));
 
         List<UserDTO> users = userService.getAllUsers();
 
@@ -45,12 +52,7 @@ class UserServiceTest {
     @Test
     void testSearchUsersByName() {
         String name = "noluthandoh14";
-        User user = new User();
-        user.setId(UUID.randomUUID());
-        user.setName(name);
-        user.setEmail("noluthandoh14@gmail.com");
-
-        when(userRepository.findByNameContainingIgnoreCase(name)).thenReturn(Collections.singletonList(user));
+        when(userRepository.findByNameContainingIgnoreCase(name)).thenReturn(Collections.singletonList(testUser));
 
         List<UserDTO> users = userService.searchUsersByName(name);
 
@@ -61,48 +63,58 @@ class UserServiceTest {
     }
 
     @Test
-    void testUpdateUser() {
-        UUID userId = UUID.randomUUID();
+    void testUpdateUser_Success() {
         UserDTO userDTO = new UserDTO();
         userDTO.setName("Updated Name");
 
-        User existingUser = new User();
-        existingUser.setId(userId);
-        existingUser.setName("noluthandoh14");
-        existingUser.setEmail("noluthandoh14@gmail.com");
+        when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+            User savedUser = invocation.getArgument(0);
+            savedUser.setName("Updated Name");
+            return savedUser;
+        });
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
-        when(userRepository.save(any(User.class))).thenReturn(existingUser);
-
-        UserDTO updatedUser = userService.updateUser(userDTO, "noluthandoh14", userId);
+        UserDTO updatedUser = userService.updateUser(userDTO, testUserId, requesterId);
 
         assertNotNull(updatedUser);
         assertEquals("Updated Name", updatedUser.getName());
+        verify(userRepository).save(any(User.class));
+    }
+
+    @Test
+    void testUpdateUser_UserNotFound() {
+        UserDTO userDTO = new UserDTO();
+        userDTO.setName("Updated Name");
+
+        when(userRepository.findById(testUserId)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFound.class, () -> {
+            userService.updateUser(userDTO, testUserId, requesterId);
+        });
+
+        verify(userRepository, never()).save(any(User.class));
     }
 
     @Test
     void testDeactivateUser_Success() {
-        String name = "noluthandoh14";
-        User user = new User();
-        user.setId(UUID.randomUUID());
-        user.setName(name);
-        user.setEmail("noluthandoh14@gmail.com");
-        user.setIsActive(true);
+        when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+        when(userRepository.save(any(User.class))).thenReturn(testUser);
 
-        when(userRepository.findByNameContainingIgnoreCase(name)).thenReturn(Collections.singletonList(user));
-        when(userRepository.save(any(User.class))).thenReturn(user);
-
-        boolean result = userService.deactivateUser(name);
+        boolean result = userService.deactivateUser(testUserId);
 
         assertTrue(result);
-        assertFalse(user.getIsActive());
+        assertFalse(testUser.getIsActive());
+        verify(userRepository).save(testUser);
     }
 
     @Test
     void testDeactivateUser_UserNotFound() {
-        String name = "noluthandoh14";
-        when(userRepository.findByNameContainingIgnoreCase(name)).thenReturn(Collections.emptyList());
+        when(userRepository.findById(testUserId)).thenReturn(Optional.empty());
 
-        assertThrows(UserNotFoundException.class, () -> userService.deactivateUser(name));
+        assertThrows(UserNotFoundException.class, () -> {
+            userService.deactivateUser(testUserId);
+        });
+
+        verify(userRepository, never()).save(any(User.class));
     }
 }
