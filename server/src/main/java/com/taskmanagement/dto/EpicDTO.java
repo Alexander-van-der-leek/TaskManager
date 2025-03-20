@@ -23,10 +23,9 @@ public class EpicDTO {
     public EpicDTO() {
     }
 
-    public EpicDTO(int id, String name, String description, String ownerName) {
+    public EpicDTO(int id, String name, String ownerName) {
         this.id = id;
         this.name = name;
-        this.description = description;
         this.ownerName = ownerName;
     }
 }
