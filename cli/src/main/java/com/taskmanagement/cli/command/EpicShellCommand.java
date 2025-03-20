@@ -155,7 +155,7 @@ public class EpicShellCommand {
             shellService.printInfo("ID: " + epic.get("id"));
             shellService.printInfo("Name: " + epic.get("name"));
             shellService.printInfo("Description: " + epic.get("description"));
-            shellService.printInfo("Owner: " + epic.get("ownerId"));
+            shellService.printInfo("Owner: " + epic.get("ownerName"));
             shellService.printInfo("Story Points: " + epic.get("storyPoints"));
             shellService.printInfo("Start Date: " + epic.get("startDate"));
             shellService.printInfo("Target End Date: " + epic.get("targetEndDate"));

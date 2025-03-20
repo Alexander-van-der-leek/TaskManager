@@ -54,8 +54,14 @@ public class EpicService {
         return epicRepository.findAllWithOwner();
     }
 
-    public Optional<Epic> getEpicById(int id) {
-        return epicRepository.findById(id);
+    public Optional<EpicDTO> getEpicById(int id) {
+        return epicRepository.findById(id)
+                .map(epic -> new EpicDTO(
+                        epic.getId(),
+                        epic.getName(),
+                        epic.getDescription(),
+                        epic.getOwner().getName()
+                ));
     }
 
     public Epic updateEpic(int id, EpicDTO epicDTO) {

@@ -67,6 +67,12 @@ public class UserService {
         return convertToDTO(updatedUser);
     }
 
+    public UserDTO getUserById(UUID userId) {
+        logger.info("Fetching user details for ID: {}", userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User with ID " + userId + " not found"));
+        return convertToDTO(user);
+    }
 
     @Transactional
     public boolean deactivateUser(UUID id) {
