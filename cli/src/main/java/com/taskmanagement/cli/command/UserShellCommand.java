@@ -43,7 +43,7 @@ public class UserShellCommand {
         }
     }
 
-    @ShellMethod(key = "user-update", value = "Update user details and role")
+    @ShellMethod(key = "user-update", value = "Update user role")
     @ShellMethodAvailability("isUserLoggedIn")
     public void updateUser(
             @ShellOption(help = "Name of the user to update") String name
@@ -231,7 +231,7 @@ public class UserShellCommand {
     }
 
 
-    @ShellMethod(key = "user-search", value = "Search for users by name")
+    @ShellMethod(key = "user-search", value = "Search for a user by name")
     @ShellMethodAvailability("isUserLoggedIn")
     public void searchUsers(@ShellOption(help = "Name to search for") String name) {
         try {
@@ -249,7 +249,7 @@ public class UserShellCommand {
     }
 
 
-    @ShellMethod(key = "user-deactivate", value = "Deactivate a user")
+    @ShellMethod(key = "user-deactivate", value = "Deactivate an active user")
     @ShellMethodAvailability("isUserLoggedIn")
     public void deactivateUser(@ShellOption(help = "Name of the user to deactivate") String name) {
         try {
