@@ -13,7 +13,6 @@ import com.taskmanagement.model.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
-    Optional<User> findByEmail(String email);
     Optional<User> findByGoogleId(String googleId);
     @Query("SELECT u FROM User u WHERE LOWER(u.name) LIKE LOWER(CONCAT('%', :name, '%'))")
     List<User> findByNameContainingIgnoreCase(@Param("name") String name);

@@ -20,5 +20,4 @@ public class AuthResponseDTO {
         this.name = name;
         this.email = email;
     }
-
 }

@@ -51,13 +51,11 @@ public class AuthService {
 
                     logger.info("User auth: {}", authorities.get(0));
 
-
                     String jwt = tokenProvider.createToken(
                             user.getId(),
                             user.getEmail(),
                             authorities
                     );
-
                     return new AuthResponseDTO(jwt, user.getId(), user.getName(), user.getEmail());
                 });
     }
@@ -76,7 +74,7 @@ public class AuthService {
 
         String name = googleUserInfo.getName();
         if (name == null || name.trim().isEmpty()) {
-            name = googleUserInfo.getEmail().split("@")[0]; // Use part before @ as name
+            name = googleUserInfo.getEmail().split("@")[0];
         }
         newUser.setName(name);
 

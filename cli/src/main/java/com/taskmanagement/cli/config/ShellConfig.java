@@ -1,6 +1,5 @@
 package com.taskmanagement.cli.config;
 
-import org.jline.terminal.Terminal;
 import org.jline.utils.AttributedString;
 import org.jline.utils.AttributedStyle;
 import org.springframework.beans.factory.annotation.Autowired;

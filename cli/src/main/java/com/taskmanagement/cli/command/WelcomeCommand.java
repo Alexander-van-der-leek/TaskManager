@@ -4,8 +4,6 @@ import com.taskmanagement.cli.config.UserSession;
 import com.taskmanagement.cli.service.ShellService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.shell.standard.ShellComponent;
-import org.springframework.shell.standard.ShellMethod;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;

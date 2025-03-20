@@ -133,7 +133,7 @@ public class EpicServiceTest {
     @Test
     public void testCreateEpic_UserNotFound() {
         UUID invalidUserId = UUID.randomUUID();
-        epicDTO.setOwnerId(invalidUserId);  // Set invalid userId
+        epicDTO.setOwnerId(invalidUserId);
 
         when(userRepository.findById(invalidUserId)).thenReturn(Optional.empty());
 

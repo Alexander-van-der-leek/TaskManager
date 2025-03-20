@@ -51,7 +51,6 @@ public class TaskService {
         this.taskCustomRepository = taskCustomRepository;
     }
 
-    // parsing zonedate from string
     private ZonedDateTime parseDate(String dateStr) {
         if (dateStr == null || dateStr.trim().isEmpty()) {
             return null;
@@ -76,8 +75,6 @@ public class TaskService {
                 .collect(Collectors.toList());
     }
 
-
-    // get tasks based on filter dto
     @Transactional(readOnly = true)
     public List<TaskDTO> getTasksByFilter(TaskFilterDTO filterDTO, UUID userId) {
         logger.debug("Fetching tasks by filter for user: {}", userId);
@@ -100,7 +97,6 @@ public class TaskService {
                 .collect(Collectors.toList());
     }
 
-    // get tasks assigned to person
     @Transactional(readOnly = true)
     public List<TaskDTO> getTasksByAssignee(UUID assigneeId, UUID requesterId) {
         logger.debug("Fetching tasks assigned to user: {}", assigneeId);
@@ -113,7 +109,6 @@ public class TaskService {
                 .collect(Collectors.toList());
     }
 
-    // get active tasks
     @Transactional(readOnly = true)
     public List<TaskDTO> getUserActiveTasks(UUID userId) {
         logger.debug("Fetching active tasks for user: {}", userId);
@@ -123,7 +118,6 @@ public class TaskService {
                 .collect(Collectors.toList());
     }
 
-    // get tasks for epic
     @Transactional(readOnly = true)
     public List<TaskDTO> getTasksByEpic(Integer epicId, UUID userId) {
         logger.debug("Fetching tasks for epic: {}", epicId);
@@ -137,7 +131,6 @@ public class TaskService {
                 .collect(Collectors.toList());
     }
 
-    // get tasks for sprint
     @Transactional(readOnly = true)
     public List<TaskDTO> getTasksBySprint(Integer sprintId, UUID userId) {
         logger.debug("Fetching tasks for sprint: {}", sprintId);
@@ -151,7 +144,6 @@ public class TaskService {
                 .collect(Collectors.toList());
     }
 
-    // get stats for a sprint
     @Transactional(readOnly = true)
     public Map<String, Long> getSprintStats(Integer sprintId, UUID userId) {
         logger.debug("Calculating sprint statistics for sprint: {}", sprintId);
@@ -162,7 +154,6 @@ public class TaskService {
 
         List<TaskStatus> statuses = statusRepository.findAll();
 
-        // need to count for each status
         Map<String, Long> statusCounts = statuses.stream()
                 .collect(Collectors.toMap(
                         TaskStatus::getName,
@@ -172,7 +163,6 @@ public class TaskService {
         return statusCounts;
     }
 
-    // get task by an id
     @Transactional(readOnly = true)
     public TaskDTO getTaskById(Integer id, UUID userId) {
         logger.debug("Fetching task: {} for user: {}", id, userId);
@@ -183,7 +173,6 @@ public class TaskService {
         return convertToDTO(task);
     }
 
-    // creating a task
     @Transactional
     public TaskDTO createTask(TaskDTO taskDTO, UUID creatorId) {
         logger.debug("Creating new task by user: {}", creatorId);
@@ -219,10 +208,8 @@ public class TaskService {
             Epic epic = epicRepository.findById(taskDTO.getEpicId())
                     .orElseThrow(() -> new ResourceNotFound("Epic not found with id: " + taskDTO.getEpicId()));
 
-            // check epic capacity
             checkEpicCapacity(epic, task.getStoryPoints(), 0);
 
-            // check date compatibility
             validateTaskEpicDateCompatibility(task.getDueDate(), epic);
 
             task.setEpic(epic);
@@ -232,15 +219,12 @@ public class TaskService {
             Sprint sprint = sprintRepository.findById(taskDTO.getSprintId())
                     .orElseThrow(() -> new ResourceNotFound("Sprint not found with id: " + taskDTO.getSprintId()));
 
-            // check sprint capacity
             checkSprintCapacity(sprint, task.getStoryPoints(), 0);
 
-            // check sprint date compatibility
             validateTaskSprintDateCompatibility(task.getDueDate(), sprint);
 
             task.setSprint(sprint);
         }
-
         if (status.getName().equals("DONE")) {
             task.setCompletedAt(ZonedDateTime.now());
         }
@@ -251,7 +235,6 @@ public class TaskService {
         return convertToDTO(savedTask);
     }
 
-    // possibly try move some of this to pre-auth later
     @Transactional
     public TaskDTO updateTask(TaskDTO taskDTO, UUID updaterId) {
         logger.debug("Updating task: {} by user: {}", taskDTO.getId(), updaterId);
@@ -301,7 +284,6 @@ public class TaskService {
             if (existingTask.getEpic() == null || !(existingTask.getEpic().getId()==(epic.getId())) ||
                     oldStoryPoints != taskDTO.getStoryPoints()) {
 
-                // have to consider old point values
                 int pointsToConsider = existingTask.getEpic() != null &&
                         existingTask.getEpic().getId()==(epic.getId()) ?
                         oldStoryPoints : 0;
@@ -327,7 +309,6 @@ public class TaskService {
             if (existingTask.getSprint() == null || !(existingTask.getSprint().getId()==(sprint.getId())) ||
                     oldStoryPoints != taskDTO.getStoryPoints()) {
 
-                // same as epic need to consider existing point totals
                 int pointsToConsider = existingTask.getSprint() != null &&
                         existingTask.getSprint().getId() == (sprint.getId()) ?
                         oldStoryPoints : 0;
@@ -355,7 +336,6 @@ public class TaskService {
         return convertToDTO(updatedTask);
     }
 
-    // ability to search by a title
     @Transactional(readOnly = true)
     public List<TaskDTO> searchTasksByTitle(String title, UUID userId) {
         logger.debug("Searching for tasks with title containing: {}", title);
@@ -364,7 +344,6 @@ public class TaskService {
                 .collect(Collectors.toList());
     }
 
-    // change statuses
     @Transactional
     public TaskDTO changeTaskStatus(Integer taskId, Integer statusId, UUID userId) {
         logger.debug("Changing status of task: {} to status: {} by user: {}", taskId, statusId, userId);
@@ -405,7 +384,6 @@ public class TaskService {
         return convertToDTO(updatedTask);
     }
 
-    // assign task to someone
     @Transactional
     public TaskDTO assignTask(Integer taskId, UUID assigneeId, UUID userId) {
         logger.debug("Assigning task: {} to user: {} by user: {}", taskId, assigneeId, userId);
@@ -416,7 +394,6 @@ public class TaskService {
         User assignee = userRepository.findById(assigneeId)
                 .orElseThrow(() -> new ResourceNotFound("User not found with id: " + assigneeId));
 
-        // need isactive checks
         if (assignee.getIsActive() == null || !assignee.getIsActive()) {
             throw new IllegalStateException("Cannot assign task to inactive user: " + assignee.getName());
         }
@@ -445,7 +422,6 @@ public class TaskService {
         return convertToDTO(updatedTask);
     }
 
-    // add tasks to sprints
     @Transactional
     public TaskDTO addTaskToSprint(Integer taskId, Integer sprintId, UUID userId) {
         logger.debug("Adding task: {} to sprint: {} by user: {}", taskId, sprintId, userId);
@@ -456,7 +432,6 @@ public class TaskService {
         Sprint sprint = sprintRepository.findById(sprintId)
                 .orElseThrow(() -> new ResourceNotFound("Sprint not found with id: " + sprintId));
 
-        // need to check for active sprints
         if (!sprint.isActive()) {
             logger.warn("User {} attempted to add task {} to inactive sprint {}", userId, taskId, sprintId);
             throw new IllegalStateException("Cannot add tasks to inactive sprints");
@@ -466,7 +441,6 @@ public class TaskService {
                 task.getStoryPoints() : 0;
         checkSprintCapacity(sprint, task.getStoryPoints(), pointsToConsider);
 
-        // still validate point totals
         validateTaskSprintDateCompatibility(task.getDueDate(), sprint);
 
         Integer previousSprintId = task.getSprint() != null ? task.getSprint().getId() : null;
@@ -502,7 +476,6 @@ public class TaskService {
         return convertToDTO(updatedTask);
     }
 
-    // adding tasks to epics
     @Transactional
     public TaskDTO addTaskToEpic(Integer taskId, Integer epicId, UUID userId) {
         logger.debug("Adding task: {} to epic: {} by user: {}", taskId, epicId, userId);
@@ -513,7 +486,6 @@ public class TaskService {
         Epic epic = epicRepository.findById(epicId)
                 .orElseThrow(() -> new ResourceNotFound("Epic not found with id: " + epicId));
 
-        // need date and point validity
         int pointsToConsider = task.getEpic() != null && task.getEpic().getId()==(epic.getId()) ?
                 task.getStoryPoints() : 0;
         checkEpicCapacity(epic, task.getStoryPoints(), pointsToConsider);
@@ -682,7 +654,6 @@ public class TaskService {
         }
     }
 
-    // capacity helper for epics, get all tasks and add
     private void checkEpicCapacity(Epic epic, int taskStoryPoints, int existingPointsToSubtract) {
         List<Task> epicTasks = taskRepository.findByEpicId(epic.getId());
 
@@ -701,7 +672,6 @@ public class TaskService {
         }
     }
 
-    // capacity helper for sprints
     private void checkSprintCapacity(Sprint sprint, int taskStoryPoints, int existingPointsToSubtract) {
         List<Task> sprintTasks = taskRepository.findBySprintId(sprint.getId());
 
@@ -729,14 +699,11 @@ public class TaskService {
         dto.setEstimatedHours(task.getEstimatedHours());
         dto.setDueDate(task.getDueDate());
         dto.setCompletedAt(task.getCompletedAt());
-
         dto.setCreatedById(task.getCreatedBy().getId());
         dto.setAssignedToId(task.getAssignedTo().getId());
         dto.setAssignedToName(task.getAssignedTo().getName());
-
         dto.setStatusId(task.getStatus().getId());
         dto.setStatusName(task.getStatus().getName());
-
         dto.setPriorityId(task.getPriority().getId());
         dto.setPriorityName(task.getPriority().getName());
 
@@ -749,7 +716,6 @@ public class TaskService {
             dto.setSprintId(task.getSprint().getId());
             dto.setSprintName(task.getSprint().getName());
         }
-
         return dto;
     }
 }

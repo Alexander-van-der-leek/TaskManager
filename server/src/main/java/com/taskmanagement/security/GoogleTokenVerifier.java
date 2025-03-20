@@ -15,14 +15,12 @@ import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.Optional;
 
-
 @Component
 public class GoogleTokenVerifier {
     private static final Logger logger = LoggerFactory.getLogger(GoogleTokenVerifier.class);
 
     private final GoogleIdTokenVerifier verifier;
 
-    // verify our google tokens
     public GoogleTokenVerifier(@Value("${security.oauth2.google.client-id}") String clientId) {
         this.verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
                 .setAudience(Collections.singletonList(clientId))
@@ -30,7 +28,6 @@ public class GoogleTokenVerifier {
         logger.info("GoogleTokenVerifier initialized with client ID: {}", clientId);
     }
 
-    // return the user from Google
     public Optional<GoogleUserInfo> verify(String idTokenString) {
         try {
             GoogleIdToken idToken = verifier.verify(idTokenString);
@@ -46,11 +43,13 @@ public class GoogleTokenVerifier {
 
                 logger.info("Successfully verified Google token for user: {}", userInfo.getEmail());
                 return Optional.of(userInfo);
-            } else {
+            }
+            else {
                 logger.warn("Invalid Google ID token provided");
                 return Optional.empty();
             }
-        } catch (GeneralSecurityException | IOException e) {
+        }
+        catch (GeneralSecurityException | IOException e) {
             logger.error("Error verifying Google token", e);
             return Optional.empty();
         }

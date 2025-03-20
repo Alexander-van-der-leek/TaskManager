@@ -7,7 +7,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/sprints")
@@ -19,7 +18,6 @@ public class SprintController {
         this.sprintService = sprintService;
     }
 
-    // need scrum master to create sprints
     @PostMapping
     @PreAuthorize("hasRole('SCRUM_MASTER') or hasRole('ADMIN')")
     public ResponseEntity<SprintDTO> createSprint(@RequestBody SprintDTO sprintDTO) {

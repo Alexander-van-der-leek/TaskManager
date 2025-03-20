@@ -52,5 +52,4 @@ public class TaskDTO {
     private String priorityName;
     private String epicName;
     private String sprintName;
-
 }

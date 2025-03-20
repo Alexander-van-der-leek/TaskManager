@@ -11,7 +11,6 @@ import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
 
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -80,7 +79,7 @@ public class TaskShellCommand {
 
             Integer priorityId = getPriorityIdByName(priorityName);
 
-            @SuppressWarnings("unchecked")
+
             Map<String, Object> user = (Map<String, Object>)users[0];
             String assigneeId = String.valueOf(user.get("id"));
 

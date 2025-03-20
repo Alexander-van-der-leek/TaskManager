@@ -28,5 +28,4 @@ public class UserDTO {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
     private ZonedDateTime updatedAt;
-
 }

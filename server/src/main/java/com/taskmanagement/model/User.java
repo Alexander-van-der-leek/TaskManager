@@ -35,7 +35,6 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     private ZonedDateTime updatedAt;
 
-    // Automatically set the timestamps before persisting or updating the entity
     @PrePersist
     protected void onCreate() {
         createdAt = updatedAt = ZonedDateTime.now();

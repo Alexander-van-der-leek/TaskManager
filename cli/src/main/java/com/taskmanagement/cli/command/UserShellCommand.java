@@ -109,11 +109,9 @@ public class UserShellCommand {
                 return;
             }
 
-
             Map<String, Object> userUpdateData = createUpdateData(userId, roleId);
             apiService.put("/users/" + userId, userUpdateData, Object.class);
             shellService.printSuccess("User updated successfully!");
-
 
         } catch (Exception e) {
             shellService.printError("Error updating user: " + e.getMessage());
@@ -130,7 +128,6 @@ public class UserShellCommand {
         var authorities = authentication.getAuthorities();
         return authorities.stream()
                 .anyMatch(authority -> "ADMIN".equals(authority.getAuthority()));
-
     }
 
     private boolean isUserActive(Map<String, Object> user) {
@@ -149,9 +146,9 @@ public class UserShellCommand {
                 String roleName = (String) role.get("name");
                 roleNames.add(roleName);
             }
-
             return roleNames;
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             shellService.printError("Error fetching roles: " + e.getMessage());
             return Collections.emptyList();
         }
@@ -248,7 +245,6 @@ public class UserShellCommand {
         }
     }
 
-
     @ShellMethod(key = "user-deactivate", value = "Deactivate a user")
     @ShellMethodAvailability("isUserLoggedIn")
     public void deactivateUser(@ShellOption(help = "Name of the user to deactivate") String name) {
@@ -308,15 +304,12 @@ public class UserShellCommand {
         }
     }
 
-
-
     private void displayUsersTable(Object[] users) {
         List<String[]> tableData = new ArrayList<>();
 
         for (Object userObj : users) {
             @SuppressWarnings("unchecked")
             Map<String, Object> user = (Map<String, Object>) userObj;
-
 
             String[] row = new String[5];
             row[0] = String.valueOf(user.get("id"));

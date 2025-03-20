@@ -37,7 +37,6 @@ public class JWTTokenProvider {
         logger.info("JWTTokenProvider initialized with token validity of {} seconds", tokenValidityInSeconds);
     }
 
-    // basic token creation + in auth, claims, use jjwt library
     public String createToken(UUID userId, String email, Collection<? extends GrantedAuthority> authorities) {
         long now = (new Date()).getTime();
         Date validity = new Date(now + this.tokenValidityInMilliseconds);
@@ -53,7 +52,6 @@ public class JWTTokenProvider {
                 .compact();
     }
 
-    // extract our claims comma seperated, and create security user principal returning the authentiacation
     public Authentication getAuthentication(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key)
@@ -72,7 +70,6 @@ public class JWTTokenProvider {
         return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }
 
-    // validate our token
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);

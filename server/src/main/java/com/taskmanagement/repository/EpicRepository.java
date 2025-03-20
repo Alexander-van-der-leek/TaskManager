@@ -12,8 +12,6 @@ import java.util.List;
 
 @Repository
 public interface EpicRepository extends JpaRepository<Epic, Integer> {
-    List<Epic> findByOwner(User owner);
-
     @Query("SELECT new com.taskmanagement.dto.EpicDTO(e.id, e.name, e.owner.name) FROM Epic e")
     List<EpicDTO> findAllWithOwner();
 

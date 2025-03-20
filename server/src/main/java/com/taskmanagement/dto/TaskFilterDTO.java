@@ -14,12 +14,4 @@ public class TaskFilterDTO {
 
     public TaskFilterDTO() {
     }
-
-    public TaskFilterDTO(UUID assignedToId, Integer statusId, Integer priorityId, Integer sprintId, Integer epicId) {
-        this.assignedToId = assignedToId;
-        this.statusId = statusId;
-        this.priorityId = priorityId;
-        this.sprintId = sprintId;
-        this.epicId = epicId;
-    }
 }

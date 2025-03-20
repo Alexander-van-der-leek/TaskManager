@@ -313,7 +313,6 @@ public class TaskServiceTest {
         when(statusRepository.findById(5)).thenReturn(Optional.of(doneStatus));
         when(taskRepository.save(any(Task.class))).thenAnswer(invocation -> {
             Task savedTask = invocation.getArgument(0);
-            // Verify that completedAt is set when status is DONE
             assertNotNull(savedTask.getCompletedAt());
             savedTask.setStatus(doneStatus);
             return savedTask;
@@ -577,7 +576,7 @@ public class TaskServiceTest {
         taskWithLateDueDate.setAssignedTo(assignee);
         taskWithLateDueDate.setStatus(status);
         taskWithLateDueDate.setPriority(priority);
-        taskWithLateDueDate.setDueDate(ZonedDateTime.now().plusDays(30)); // After sprint end
+        taskWithLateDueDate.setDueDate(ZonedDateTime.now().plusDays(30));
 
         when(taskRepository.findById(taskId)).thenReturn(Optional.of(taskWithLateDueDate));
         when(sprintRepository.findById(sprintId)).thenReturn(Optional.of(sprint));
@@ -598,7 +597,7 @@ public class TaskServiceTest {
         completedSprint.setScrumMaster(user);
         completedSprint.setActive(false);
         completedSprint.setStartDate(ZonedDateTime.now().minusDays(30));
-        completedSprint.setEndDate(ZonedDateTime.now().minusDays(10)); // Already ended
+        completedSprint.setEndDate(ZonedDateTime.now().minusDays(10));
         completedSprint.setCapacityPoints(100);
 
         when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
@@ -629,7 +628,7 @@ public class TaskServiceTest {
         taskWithLateDueDate.setAssignedTo(assignee);
         taskWithLateDueDate.setStatus(status);
         taskWithLateDueDate.setPriority(priority);
-        taskWithLateDueDate.setDueDate(ZonedDateTime.now().plusDays(30)); // After epic end
+        taskWithLateDueDate.setDueDate(ZonedDateTime.now().plusDays(30));
 
         when(taskRepository.findById(taskId)).thenReturn(Optional.of(taskWithLateDueDate));
         when(epicRepository.findById(epicId)).thenReturn(Optional.of(epicWithEndDate));
@@ -651,7 +650,7 @@ public class TaskServiceTest {
         completedEpic.setStoryPoints(100);
         completedEpic.setStartDate(ZonedDateTime.now().minusDays(60));
         completedEpic.setTargetEndDate(ZonedDateTime.now().minusDays(10));
-        completedEpic.setActualEndDate(ZonedDateTime.now().minusDays(5)); // Already completed
+        completedEpic.setActualEndDate(ZonedDateTime.now().minusDays(5));
 
         when(taskRepository.findByEpicId(epicId)).thenReturn(Collections.emptyList());
 

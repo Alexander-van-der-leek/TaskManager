@@ -35,7 +35,6 @@ public class APIService {
         this.userSession = userSession;
     }
 
-    // authenticating user
     public Map<String, Object> authenticate(String idToken) {
         Map<String, String> requestBody = new HashMap<>();
         requestBody.put("idToken", idToken);
@@ -49,20 +48,22 @@ public class APIService {
                     .block();
 
             return objectMapper.readValue(jsonResponse, new TypeReference<Map<String, Object>>() {});
-        } catch (WebClientResponseException e) {
+        }
+        catch (WebClientResponseException e) {
             try {
                 Map<String, Object> errorResponse = objectMapper.readValue(
                         e.getResponseBodyAsString(), new TypeReference<Map<String, Object>>() {});
                 throw new RuntimeException(String.valueOf(errorResponse.get("error")));
-            } catch (JsonProcessingException jsonException) {
+            }
+            catch (JsonProcessingException jsonException) {
                 throw new RuntimeException("Authentication failed: " + e.getMessage());
             }
-        } catch (JsonProcessingException e) {
+        }
+        catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to process server response: " + e.getMessage());
         }
     }
 
-    // Generic methods to use for all rest functionality, just generic return
     public <T> T get(String uri, Class<T> responseType) {
         try {
             return webClient.get()
@@ -136,7 +137,6 @@ public class APIService {
         }
     }
 
-    // just add error handler
     private void handleApiError(WebClientResponseException ex) {
         try {
             Map<String, Object> errorResponse = objectMapper.readValue(
@@ -150,7 +150,8 @@ public class APIService {
             }
 
             throw new RuntimeException(cleanedMessage);
-        } catch (JsonProcessingException jsonException) {
+        }
+        catch (JsonProcessingException jsonException) {
             throw new RuntimeException("API Error: " + ex.getStatusCode() + " - " + ex.getMessage());
         }
     }

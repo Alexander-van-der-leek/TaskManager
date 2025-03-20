@@ -116,7 +116,6 @@ public class SprintServiceTest {
         assertEquals(updatedSprintDTO.getGoal(), updatedSprint.getGoal());
     }
 
-
     @Test
     public void testStartSprint_Success() {
         SprintDTO startedSprint = sprintService.startSprint(1);

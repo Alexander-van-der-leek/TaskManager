@@ -7,12 +7,10 @@ import com.taskmanagement.model.Sprint;
 import com.taskmanagement.model.User;
 import com.taskmanagement.repository.SprintRepository;
 import com.taskmanagement.repository.UserRepository;
-import com.taskmanagement.exception.UserNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
     @Service
@@ -36,7 +34,6 @@ import java.util.stream.Collectors;
             sprint.setActive(sprintDTO.isActive());
             sprint.setCreatedAt(ZonedDateTime.now());
             sprint.setUpdatedAt(ZonedDateTime.now());
-
 
             User scrumMaster = userRepository.findById(sprintDTO.getScrumMasterId())
                     .orElseThrow(() -> new UserNotFoundException(sprintDTO.getScrumMasterId()));
@@ -87,7 +84,6 @@ import java.util.stream.Collectors;
             Sprint sprint = sprintRepository.findById(sprintId)
                     .orElseThrow(() -> new SprintNotFoundException(sprintId));
 
-            // Start the sprint: Set active and start date
             sprint.setActive(true);
             sprint.setStartDate(ZonedDateTime.now());
             sprint.setUpdatedAt(ZonedDateTime.now());
@@ -100,7 +96,6 @@ import java.util.stream.Collectors;
             Sprint sprint = sprintRepository.findById(sprintId)
                     .orElseThrow(() -> new SprintNotFoundException(sprintId));
 
-            // End the sprint: Set inactive and end date
             sprint.setActive(false);
             sprint.setEndDate(ZonedDateTime.now());
             sprint.setUpdatedAt(ZonedDateTime.now());

@@ -19,7 +19,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/epics")
 public class EpicController {
-    // general epics controller
     private static final Logger logger = LoggerFactory.getLogger(EpicController.class);
     private final EpicService epicService;
 
@@ -27,7 +26,6 @@ public class EpicController {
         this.epicService = epicService;
     }
 
-    // only owners and admins can create epics, call on epic service
     @PostMapping
     @PreAuthorize("hasRole('PRODUCT_OWNER') or hasRole('ADMIN')")
     public ResponseEntity<Epic> createEpic(@RequestBody EpicDTO epicDTO) {
@@ -48,7 +46,6 @@ public class EpicController {
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-    // updating epics can only be done by admins, scrum masters or owners
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('SCRUM_MASTER') or @epicService.isOwner(#id, authentication.principal.username)")
     public ResponseEntity<Epic> updateEpic(@PathVariable Integer id, @RequestBody EpicDTO epicDTO) {
@@ -56,7 +53,6 @@ public class EpicController {
         return ResponseEntity.ok(updatedEpic);
     }
 
-    // delete requires admin or owner
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or @epicService.isOwner(#id, authentication.principal.username)")
     public ResponseEntity<Void> deleteEpic(@PathVariable Integer id) {

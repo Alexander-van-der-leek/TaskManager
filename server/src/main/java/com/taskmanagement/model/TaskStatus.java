@@ -3,9 +3,6 @@ package com.taskmanagement.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.time.ZonedDateTime;
-import java.util.UUID;
-
 @Data
 @Entity
 @Table(name = "task_statuses")
@@ -17,9 +14,6 @@ public class TaskStatus {
     @Column(nullable = false, unique = true)
     private String name;
 
-
     @Column(name = "display_order", nullable = false)
     private int displayOrder;
-
-
 }

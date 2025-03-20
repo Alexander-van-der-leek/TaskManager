@@ -67,7 +67,6 @@ public class UserService {
         return convertToDTO(updatedUser);
     }
 
-
     @Transactional
     public boolean deactivateUser(UUID id) {
         User user = userRepository.findById(id)

@@ -114,7 +114,6 @@ public class EpicShellCommand {
 
             if (users.length > 1) {
                 shellService.printWarning("Multiple users found with that name. Please be more specific:");
-                //displayUsersTable(users);
                 return;
             }
 

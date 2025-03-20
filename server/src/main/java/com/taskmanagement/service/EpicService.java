@@ -101,10 +101,4 @@ public class EpicService {
                 })
                 .collect(Collectors.toList());
     }
-
-    public boolean isOwner(Integer epicId, String name) {
-        return epicRepository.findById(epicId)
-                .map(epic -> epic.getOwner().getName().equals(name))
-                .orElse(false);
-    }
 }
