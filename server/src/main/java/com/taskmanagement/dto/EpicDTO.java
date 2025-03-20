@@ -23,7 +23,7 @@ public class EpicDTO {
     public EpicDTO() {
     }
 
-    public EpicDTO(Integer id, String name, String ownerName) {
+    public EpicDTO(int id, String name, String ownerName) {
         this.id = id;
         this.name = name;
         this.ownerName = ownerName;

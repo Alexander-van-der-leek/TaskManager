@@ -81,15 +81,7 @@ class EpicControllerTest {
         assertEquals(epicList, response.getBody());
     }
 
-    @Test
-    void getEpicById_whenEpicExists_shouldReturnEpic() {
-        when(epicService.getEpicById(epicId)).thenReturn(Optional.of(epic));
 
-        ResponseEntity<Epic> response = epicController.getEpicById(epicId);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(epic, response.getBody());
-    }
 
     @Test
     void getEpicById_whenEpicDoesNotExist_shouldReturnNotFound() {

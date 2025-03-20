@@ -92,7 +92,6 @@ public class UserShellCommand {
                 shellService.printError("You cannot update an inactive user.");
                 return;
             }
-
             List<String> roleNames = fetchAvailableRoles();
             shellService.printHeading("Available roles:");
             roleNames.forEach(shellService::printInfo);
