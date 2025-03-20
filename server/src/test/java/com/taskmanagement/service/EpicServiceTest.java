@@ -124,7 +124,7 @@ public class EpicServiceTest {
 
     @Test
     public void testGetEpicById() {
-        Optional<EpicDTO> fetchedEpic = epicService.getEpicById(1);
+        Optional<Epic> fetchedEpic = epicService.getEpicById(1);
 
         assertTrue(fetchedEpic.isPresent());
         assertEquals(epic.getName(), fetchedEpic.get().getName());
